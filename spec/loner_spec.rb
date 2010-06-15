@@ -4,7 +4,7 @@ class SomeJob
   @queue = :some_queue
 end
 
-class SomeLonerJob < Resque::LonerJob
+class SomeLonerJob < Resque::Plugins::Loner::LonerJob
   @queue = :other_queue
   def self.perform
   end
@@ -30,11 +30,13 @@ describe "Resque" do
   
   it "should allow the same jobs to be executed one after the other" do
     Resque.enqueue SomeLonerJob, "foo"
+    Resque.enqueue SomeLonerJob, "foo"
     Resque.size(:other_queue).should == 1
 
-    Resque.pop(:other_queue)
+    Resque.reserve(:other_queue)
     Resque.size(:other_queue).should == 0
-    
+
+    Resque.enqueue SomeLonerJob, "foo"
     Resque.enqueue SomeLonerJob, "foo"
     Resque.size(:other_queue).should == 1
   end

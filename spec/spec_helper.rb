@@ -9,7 +9,6 @@ require 'resque'
 require 'lib/resque_loner'
 require 'ruby-debug'
 
-
 Spec::Runner.configure do |config|
   config.before(:suite) do
     if !system("which redis-server")
