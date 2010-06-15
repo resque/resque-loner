@@ -27,7 +27,7 @@ module Resque
       
         def self.item_is_a_loner_job?(item)
           klass = constantize(item[:class] || item["class"])
-          klass.ancestors.include?(::Resque::Plugins::Loner::LonerJob)
+          klass.ancestors.include?(::Resque::Plugins::Loner::UniqueJob)
         end
         
         def self.job_destroy(queue, klass, *args)
