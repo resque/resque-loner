@@ -1,6 +1,8 @@
-require 'lib/resque_loner/job'
+require 'rubygems'
+require 'resque'
 require 'lib/resque_loner/loner_job'
+require 'lib/resque_loner/resque'
 
-Resque::Job.class_eval do
-  include ResqueLoner::Job
+Resque.class_eval do
+  include ResqueLoner::Resque
 end
