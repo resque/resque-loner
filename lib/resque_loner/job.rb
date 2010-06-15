@@ -28,9 +28,8 @@ module Resque
         #  Overwriting original destroy method to mark all destroyed jobs as unqueued
         #
         def self.destroy_with_loner(queue, klass, *args)
-          destroyed = destroy_without_loner(queue, klass, *args)
-          
-          destroyed
+          Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args)
+          destroy_without_loner(queue, klass, *args)
         end
         
         class << self
