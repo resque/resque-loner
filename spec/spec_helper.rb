@@ -1,13 +1,8 @@
-dir = File.dirname(File.expand_path(__FILE__))
-$LOAD_PATH.unshift dir + '/../lib'
-$TESTING = true
-
 require 'spec'
-
 require 'rubygems'
+require 'ruby-debug'
 require 'resque'
 require 'resque-loner'
-require 'ruby-debug'
 
 Spec::Runner.configure do |config|
   config.before(:suite) do

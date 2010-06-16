@@ -1,11 +1,14 @@
-dir = File.dirname(File.expand_path(__FILE__))
-$LOAD_PATH.unshift dir + '/../lib'
-$TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'resque'
-require 'resque-loner'
 require 'ruby-debug'
+
+dir = File.dirname(File.expand_path(__FILE__))
+$LOAD_PATH.unshift dir + '/../lib'
+$TESTING = true
+
+require 'resque-loner'
+
 
 #
 # make sure we can run redis
