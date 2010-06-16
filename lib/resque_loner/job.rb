@@ -14,8 +14,9 @@ module Resque
     def self.create_with_loner(queue, klass, *args)
       item = { :class => klass.to_s, :args => args }
       return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
-      create_without_loner(queue, klass, *args)
+      job = create_without_loner(queue, klass, *args)
       Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
+      job
     end
     
     #
