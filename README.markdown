@@ -55,15 +55,17 @@ Just like that you've assured that on the :cache_sweeps queue, there can only be
 How it works
 --------
 
-For each created UniqueJob, resque-loner sets a redis key. This key remains set until the job has either been fetched from the queue or destroyed through the Resque::Job.destroy method. These keys look like this:
+For each created UniqueJob, resque-loner sets a redis key to 1. This key remains set until the job has either been fetched from the queue or destroyed through the Resque::Job.destroy method. As long as the key is set, the job is considered queued and consequent queue adds are being rejected.
+
+Here's how these keys are constructed:
 
     resque:loners:queue:cache_sweeps:job:5ac5a005253450606aa9bc3b3d52ea5b
-                                         ^---- Job's ID
+                                         ^---- Job's ID (#redis_key method)
                         ^--------------------- Name of the queue
                ^------------------------------ Prefix for this plugin
     ^----------------------------------------- Your redis namespace
 
-The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be { 'class': 'CacheSweeper', 'args': [15] }. The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
+The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be `{ 'class': 'CacheSweeper', 'args': [15] }`. The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
 
 You could also use the whole payload or anything else as a redis key, as long as you make sure these requirements are met:
 
