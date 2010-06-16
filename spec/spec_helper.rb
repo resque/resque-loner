@@ -6,7 +6,7 @@ require 'spec'
 
 require 'rubygems'
 require 'resque'
-require 'resque_loner'
+require 'resque-loner'
 require 'ruby-debug'
 
 Spec::Runner.configure do |config|

@@ -1,0 +1,5 @@
+require 'rubygems'
+require 'resque'
+require 'lib/resque-loner/unique_job'
+require 'lib/resque-loner/helpers'
+require 'lib/resque-loner/job'

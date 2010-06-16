@@ -4,7 +4,7 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'resque'
-require 'resque_loner'
+require 'resque-loner'
 require 'ruby-debug'
 
 #
