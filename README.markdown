@@ -55,6 +55,8 @@ Just like that you've assured that on the :cache_sweeps queue, there can only be
 How it works
 --------
 
+### Keeping track of queued unique jobs
+
 For each created UniqueJob, resque-loner sets a redis key to 1. This key remains set until the job has either been fetched from the queue or destroyed through the Resque::Job.destroy method. As long as the key is set, the job is considered queued and consequent queue adds are being rejected.
 
 Here's how these keys are constructed:
@@ -65,7 +67,11 @@ Here's how these keys are constructed:
                ^------------------------------ Prefix for this plugin
     ^----------------------------------------- Your redis namespace
 
-The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be `{ 'class': 'CacheSweeper', 'args': [15] }`. The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
+The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be:
+
+    { 'class': 'CacheSweeper', 'args': [15] }`
+
+The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
 
 You could also use the whole payload or anything else as a redis key, as long as you make sure these requirements are met:
 
@@ -73,3 +79,7 @@ You could also use the whole payload or anything else as a redis key, as long as
 2. The key must not be binary, because this restriction applies to redis keys: *Keys are not binary safe strings in Redis, but just strings not containing a space or a newline character. For instance "foo" or "123456789" or "foo_bar" are valid keys, while "hello world" or "hello\n" are not.* (see http://code.google.com/p/redis/wiki/IntroductionToRedisDataTypes)
 
 So when your job overwrites the #redis_key method, make sure these requirements are met. And all should be good.
+
+### Resque integration
+
+Unfortunately not everything could be done as a plugin, so I overwrote three methods of Resque::Job: create, reserve and destroy (there were no hooks for these events). All the logic is in `module Resque::Plugins::Loner` though, so it should be fairly easy to make this a *pure* plugin once the hooks are there.
