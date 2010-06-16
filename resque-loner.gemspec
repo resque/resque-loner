@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.has_rdoc    = false
   
   s.required_rubygems_version = ">= 1.3.6"
-#  s.rubyforge_project         = "resque-loner"
+  s.rubyforge_project         = "resque-loner"
  
   s.add_development_dependency "rspec"
  
