@@ -62,10 +62,10 @@ For each created UniqueJob, resque-loner sets a redis key to 1. This key remains
 Here's how these keys are constructed:
 
     resque:loners:queue:cache_sweeps:job:5ac5a005253450606aa9bc3b3d52ea5b
-                                         ^---- Job's ID (#redis_key method)
-                        ^--------------------- Name of the queue
-               ^------------------------------ Prefix for this plugin
-    ^----------------------------------------- Your redis namespace
+    |          |        |                `---- Job's ID (#redis_key method)
+    |          |        `--------------------- Name of the queue
+    |          `------------------------------ Prefix for this plugin
+    `----------------------------------------- Your redis namespace
 
 The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be:
 

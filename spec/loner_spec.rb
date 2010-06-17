@@ -71,7 +71,7 @@ describe "Resque" do
   describe "Queues" do
     
     it "should allow for jobs to be queued in other queues than their default" do
-      Resque.enqueue_in :yet_another_queue, SomeUniqueJob, 22
+      Resque.enqueue_to :yet_another_queue, SomeUniqueJob, 22
       
       Resque.size(:other_queue).should == 0
       Resque.size(:yet_another_queue).should ==1
