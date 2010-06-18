@@ -17,7 +17,7 @@ module Resque
   
   def self.enqueued_in?(queue, klass, *args)
     item = { :class => klass.to_s, :args => args }
-    return nil unless Resque::Plugins::Loner::Helpers.item_is_a_loner_job?(item)
+    return nil unless Resque::Plugins::Loner::Helpers.item_is_a_unique_job?(item)
     Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
   end
   

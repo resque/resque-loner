@@ -5,33 +5,33 @@ module Resque
         extend Resque::Helpers
 
         def self.loner_queued?(queue, item)
-          return false unless item_is_a_loner_job?(item)
-          redis.get(loner_job_queue_key(queue, item)) == "1"
+          return false unless item_is_a_unique_job?(item)
+          redis.get(unique_job_queue_key(queue, item)) == "1"
         end
       
         def self.mark_loner_as_queued(queue, item)
-          return unless item_is_a_loner_job?(item)
-          redis.set(loner_job_queue_key(queue, item), 1)
+          return unless item_is_a_unique_job?(item)
+          redis.set(unique_job_queue_key(queue, item), 1)
         end
 
         def self.mark_loner_as_unqueued(queue, job)
           item = job.is_a?(Resque::Job) ? job.payload : job
-          return unless item_is_a_loner_job?(item)
-          redis.del(loner_job_queue_key(queue, item))
+          return unless item_is_a_unique_job?(item)
+          redis.del(unique_job_queue_key(queue, item))
         end
 
-        def self.loner_job_queue_key(queue, item)
+        def self.unique_job_queue_key(queue, item)
           job_key = constantize(item[:class] || item["class"]).redis_key(item)
           "loners:queue:#{queue}:job:#{job_key}"
         end
       
-        def self.item_is_a_loner_job?(item)
+        def self.item_is_a_unique_job?(item)
           begin
             klass = constantize(item[:class] || item["class"])
             klass.ancestors.include?(::Resque::Plugins::Loner::UniqueJob)
           rescue
-            false
-          end
+            false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
+          end     # so resque-loner should not start throwing up when that happens.
         end
         
         def self.job_destroy(queue, klass, *args)
