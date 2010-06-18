@@ -52,6 +52,15 @@ Just like that you've assured that on the :cache_sweeps queue, there can only be
     >> Resque.size :cache_sweeps
     => 1
 
+Since resque-loner keeps track of which jobs are queued in a way that allows for finding jobs very quickly, you can also query if a job is currently in a queue:
+
+    >> Resque.enqueue CacheSweeper, 15
+    => "OK"
+    >> Resque.enqueued? CacheSweeper, 15
+    => true
+    >> Resque.enqueued? CacheSweeper, 16
+    => false
+
 How it works
 --------
 
@@ -62,6 +71,7 @@ For each created UniqueJob, resque-loner sets a redis key to 1. This key remains
 Here's how these keys are constructed:
 
     resque:loners:queue:cache_sweeps:job:5ac5a005253450606aa9bc3b3d52ea5b
+    |          |        |                |
     |          |        |                `---- Job's ID (#redis_key method)
     |          |        `--------------------- Name of the queue
     |          `------------------------------ Prefix for this plugin
@@ -75,8 +85,9 @@ The default method to create a job ID from these parameters  is to do some norma
 
 You could also use the whole payload or anything else as a redis key, as long as you make sure these requirements are met:
 
-1. Two jobs of the same class with the same parameters/arguments/workload have to produce the same redis_key
-2. The key must not be binary, because this restriction applies to redis keys: *Keys are not binary safe strings in Redis, but just strings not containing a space or a newline character. For instance "foo" or "123456789" or "foo_bar" are valid keys, while "hello world" or "hello\n" are not.* (see http://code.google.com/p/redis/wiki/IntroductionToRedisDataTypes)
+1. Two jobs of the same class with the same parameters/arguments/workload must produce the same redis_key
+2. Two jobs with either a different class or different parameters/arguments/workloads must not produce the same redis key 
+3. The key must not be binary, because this restriction applies to redis keys: *Keys are not binary safe strings in Redis, but just strings not containing a space or a newline character. For instance "foo" or "123456789" or "foo_bar" are valid keys, while "hello world" or "hello\n" are not.* (see http://code.google.com/p/redis/wiki/IntroductionToRedisDataTypes)
 
 So when your job overwrites the #redis_key method, make sure these requirements are met. And all should be good.
 

@@ -66,6 +66,23 @@ describe "Resque" do
       Resque.enqueue SomeUniqueJob, "foo"
       Resque.size(:other_queue).should == 1
     end
+    
+    it "should report if a job is queued or not" do
+      Resque.enqueue SomeUniqueJob, "foo"
+      Resque.enqueued?(SomeUniqueJob, "foo").should be_true
+      Resque.enqueued?(SomeUniqueJob, "bar").should be_false
+    end
+
+    it "should report if a job is in a special queue or not" do
+      Resque.enqueue_to :special_queue, SomeUniqueJob, "foo"
+      Resque.enqueued_in?( :special_queue, SomeUniqueJob, "foo").should be_true
+      Resque.enqueued?( SomeUniqueJob, "foo").should be_false
+    end
+
+    it "should not be able to report if a non-unique job was enqueued" do
+      Resque.enqueued?(SomeJob).should be_nil
+    end
+    
   end
   
   describe "Queues" do
