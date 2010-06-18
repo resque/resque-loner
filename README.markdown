@@ -43,22 +43,22 @@ At this point you will have two jobs in the queue, the second of which has no ef
 
 Just like that you've assured that on the :cache_sweeps queue, there can only be one CacheSweeper job for each article. Let's see what happens when you try to enqueue a couple of these jobs now:
 
-    >> Resque.enqueue CacheSweeper, 15
+    >> Resque.enqueue CacheSweeper, 1
     => "OK"
-    >> Resque.enqueue CacheSweeper, 15
+    >> Resque.enqueue CacheSweeper, 1
     => "EXISTED"
-    >> Resque.enqueue CacheSweeper, 15
+    >> Resque.enqueue CacheSweeper, 1
     => "EXISTED"
     >> Resque.size :cache_sweeps
     => 1
 
 Since resque-loner keeps track of which jobs are queued in a way that allows for finding jobs very quickly, you can also query if a job is currently in a queue:
 
-    >> Resque.enqueue CacheSweeper, 15
+    >> Resque.enqueue CacheSweeper, 1
     => "OK"
-    >> Resque.enqueued? CacheSweeper, 15
+    >> Resque.enqueued? CacheSweeper, 1
     => true
-    >> Resque.enqueued? CacheSweeper, 16
+    >> Resque.enqueued? CacheSweeper, 2
     => false
 
 How it works
@@ -79,7 +79,7 @@ Here's how these keys are constructed:
 
 The last part of this key is the job's ID, which is pretty much your queue item's payload. For our CacheSweeper job, the payload would be:
 
-    { 'class': 'CacheSweeper', 'args': [15] }`
+    { 'class': 'CacheSweeper', 'args': [1] }`
 
 The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
 
