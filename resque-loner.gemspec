@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.summary     = "Adds unique jobs to resque"
   s.has_rdoc    = false
   
-  s.required_rubygems_version = ">= 1.3.6"
+  s.required_rubygems_version = ">= 1.3.5"
   s.rubyforge_project         = "resque-loner"
  
   s.add_development_dependency "rspec"
