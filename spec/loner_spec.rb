@@ -1,5 +1,12 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
+
+#
+#  Resque-loner specific specs. I'm shooting right through the stack here and just
+#  test the outcomes, because the implementation will change soon and the tests run
+#  quite quickly.
+#
+
 class SomeJob
   @queue = :some_queue
 end
@@ -14,6 +21,8 @@ describe "Resque" do
 
   before(:each) do
     Resque.redis.flushall
+    Resque.size(:other_queue).should == 0
+    Resque.size(:some_queue).should == 0
   end
   
   describe "Jobs" do
@@ -64,6 +73,21 @@ describe "Resque" do
 
       Resque.enqueue SomeUniqueJob, "foo"
       Resque.enqueue SomeUniqueJob, "foo"
+      Resque.size(:other_queue).should == 1
+    end
+    
+    it "should mark jobs as unqueued, when they raise an exception" do
+      worker = Resque::Worker.new(:other_queue)
+      Resque.enqueue( SomeUniqueJob, "foo" ).should == "OK"
+      Resque.enqueue( SomeUniqueJob, "foo" ).should == "EXISTED"
+      Resque.size(:other_queue).should == 1
+
+      SomeUniqueJob.should_receive(:perform).with("foo").and_raise "I beg to differ"
+      worker.process
+      Resque.size(:other_queue).should == 0
+
+      Resque.enqueue( SomeUniqueJob, "foo" ).should == "OK"
+      Resque.enqueue( SomeUniqueJob, "foo" ).should == "EXISTED"
       Resque.size(:other_queue).should == 1
     end
     
