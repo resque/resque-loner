@@ -13,7 +13,13 @@ end
 
 class SomeUniqueJob < Resque::Plugins::Loner::UniqueJob
   @queue = :other_queue
-  def self.perform
+  def self.perform(foo); end
+end
+
+class FailingUniqueJob < Resque::Plugins::Loner::UniqueJob
+  @queue = :other_queue
+  def self.perform(foo)
+    raise "I beg to differ"
   end
 end
 
@@ -76,18 +82,17 @@ describe "Resque" do
       Resque.size(:other_queue).should == 1
     end
     
-    it "should mark jobs as unqueued, when they raise an exception" do
-      worker = Resque::Worker.new(:other_queue)
-      Resque.enqueue( SomeUniqueJob, "foo" ).should == "OK"
-      Resque.enqueue( SomeUniqueJob, "foo" ).should == "EXISTED"
+    it "should mark jobs as unqueued, when they raise an exception during #perform" do
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == "OK"
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
       Resque.size(:other_queue).should == 1
 
-      SomeUniqueJob.should_receive(:perform).with("foo").and_raise "I beg to differ"
-      worker.process
+      worker = Resque::Worker.new(:other_queue)
+      worker.work 0
       Resque.size(:other_queue).should == 0
 
-      Resque.enqueue( SomeUniqueJob, "foo" ).should == "OK"
-      Resque.enqueue( SomeUniqueJob, "foo" ).should == "EXISTED"
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == "OK" # Means that the job was not queued
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
       Resque.size(:other_queue).should == 1
     end
     
