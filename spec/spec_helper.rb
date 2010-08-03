@@ -1,5 +1,4 @@
 require 'spec'
-require 'rubygems'
 require 'ruby-debug'
 require 'resque'
 require 'resque-loner'
