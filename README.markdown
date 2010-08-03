@@ -2,7 +2,7 @@
 Resque-Loner
 ======
 
-Resque-Loner is a plugin for defunkt/resque which adds unique jobs to resque. In each queue, there can be at most one UniqueJob with the same parameters.
+Resque-Loner is a plugin for defunkt/resque which adds unique jobs to resque: Only one job with the same payload per queue.
 
 
 Installation
@@ -60,6 +60,14 @@ Since resque-loner keeps track of which jobs are queued in a way that allows for
     => true
     >> Resque.enqueued? CacheSweeper, 2
     => false
+    >> Resque.enqueued_in? :another_queue, CacheSweeper, 1
+    => false
+
+If you want the same type of job in different queues, resque-loner lets you enqueue/dequeue to a queue of your choice:
+
+    >> Resque.enqueue_to :another_queue, CacheSweeper, 1
+    => "OK"
+    >> Resqueue.dequeue_from :another_queue, CacheSweeper, 1
 
 How it works
 --------
@@ -93,4 +101,4 @@ So when your job overwrites the #redis_key method, make sure these requirements 
 
 ### Resque integration
 
-Unfortunately not everything could be done as a plugin, so I overwrote three methods of Resque::Job: create, reserve and destroy (there were no hooks for these events). All the logic is in `module Resque::Plugins::Loner` though, so it should be fairly easy to make this a *pure* plugin once the hooks are there.
+Unfortunately not everything could be done as a plugin, so I overwrote three methods of Resque::Job: create, reserve and destroy (I found no hooks for these events). All the logic is in `module Resque::Plugins::Loner` though, so it should be fairly easy to make this a *pure* plugin once the hooks are known.
