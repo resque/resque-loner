@@ -10,7 +10,7 @@ Installation
 
 First install the gem:
 
-    $ gem install resque-loner
+    $ gem install resque-loner -v=0.1.2
 
 Then include it in your app:
 
@@ -68,6 +68,7 @@ If you want the same type of job in different queues, resque-loner lets you enqu
     >> Resque.enqueue_to :another_queue, CacheSweeper, 1
     => "OK"
     >> Resqueue.dequeue_from :another_queue, CacheSweeper, 1
+    => 1
 
 How it works
 --------
