@@ -112,6 +112,15 @@ describe "Resque" do
       Resque.enqueued?(SomeJob).should be_nil
     end
     
+    it "should cleanup all loners when a queue is destroyed" do
+      Resque.enqueue SomeUniqueJob, "foo"
+      Resque.enqueue FailingUniqueJob, "foo"
+      
+      Resque.remove_queue(:other_queue)
+      
+      Resque.enqueue(SomeUniqueJob, "foo").should == "OK"
+    end
+    
   end
   
   describe "Queues" do

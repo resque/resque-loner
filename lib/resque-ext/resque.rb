@@ -21,4 +21,17 @@ module Resque
     Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
   end
   
+  def self.remove_queue_with_loner_cleanup(queue)
+    self.remove_queue_without_loner_cleanup(queue)
+    Resque::Plugins::Loner::Helpers.cleanup_loners(queue)
+  end
+  
+  
+  class << self
+    
+    alias_method :remove_queue_without_loner_cleanup, :remove_queue
+    alias_method :remove_queue, :remove_queue_with_loner_cleanup
+    
+  end
+  
 end
