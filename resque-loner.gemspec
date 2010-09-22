@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.has_rdoc    = false
   
   s.rubyforge_project         = "resque-loner"
-  s.add_dependency 'resque', '1.9.5'
+  s.add_dependency 'resque', "< 2.0.0"
   s.add_development_dependency "rspec"
  
   s.files        = Dir.glob("{lib}/**/*") + %w(README.markdown)
