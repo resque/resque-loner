@@ -10,12 +10,15 @@ Installation
 
 First install the gem:
 
-    $ gem install resque-loner -v=0.1.2
+    $ gem install resque-loner 
 
 Then include it in your app:
 
     require 'resque-loner'
 
+
+Tests
+-----------
 To make sure this plugin works on your installation, you should run the tests. resque-loner is tested in RSpec, but it also includes resque's original testsuite. You can run all tests specific to resque-loner with `rake spec`. To make sure the plugin did not break resque, you can run `rake test` (the standard resque test suite).r
 
 Example
