@@ -1,13 +1,14 @@
-require 'test/unit'
-require 'rubygems'
-require 'resque'
-require 'ruby-debug'
-
 dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
+require 'test/unit'
+require 'rubygems'
+require 'resque'
 
-require 'resque-loner'
+begin
+  require 'leftright'
+rescue LoadError
+end
 
 
 #
