@@ -25,7 +25,10 @@ Gem::Specification.new do |s|
 Makes sure that for special jobs, there can be only one job with the same workload in one queue.
 
 Example:
-    class CacheSweeper < Resque::Plugins::Loner::UniqueJob
+    class CacheSweeper 
+    
+       include Resque::Plugins::UniqueJob
+
        @queue = :cache_sweeps
     
        def self.perform(article_id)

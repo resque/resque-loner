@@ -95,7 +95,7 @@ The last part of this key is the job's ID, which is pretty much your queue item'
 
     { 'class': 'CacheSweeper', 'args': [1] }`
 
-The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::Loner::UniqueJob#redis_key`).
+The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::UniqueJob#redis_key`).
 
 You could also use the whole payload or anything else as a redis key, as long as you make sure these requirements are met:
 

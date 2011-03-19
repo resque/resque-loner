@@ -11,16 +11,26 @@ class SomeJob
   @queue = :some_queue
 end
 
-class SomeUniqueJob < Resque::Plugins::Loner::UniqueJob
+class SomeUniqueJob 
+  
+  include Resque::Plugins::UniqueJob
+
   @queue = :other_queue
   def self.perform(foo); end
 end
 
-class FailingUniqueJob < Resque::Plugins::Loner::UniqueJob
+class FailingUniqueJob
+  include Resque::Plugins::UniqueJob
   @queue = :other_queue
   def self.perform(foo)
     raise "I beg to differ"
   end
+end
+
+class DeprecatedUniqueJob < Resque::Plugins::Loner::UniqueJob
+
+  @queue = :other_queue
+  def self.perform(foo); end
 end
 
 describe "Resque" do
@@ -41,6 +51,12 @@ describe "Resque" do
     it "only one of the same job sits in a queue" do
       Resque.enqueue SomeUniqueJob, "foo"
       Resque.enqueue SomeUniqueJob, "foo"
+      Resque.size(:other_queue).should == 1
+    end
+
+    it "should support deprecated Resque::Plugins::Loner::UniqueJob class" do
+      Resque.enqueue DeprecatedUniqueJob, "foo"
+      Resque.enqueue DeprecatedUniqueJob, "foo"
       Resque.size(:other_queue).should == 1
     end
   

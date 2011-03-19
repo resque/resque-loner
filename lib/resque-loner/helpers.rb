@@ -28,7 +28,7 @@ module Resque
         def self.item_is_a_unique_job?(item)
           begin
             klass = constantize(item[:class] || item["class"])
-            klass.ancestors.include?(::Resque::Plugins::Loner::UniqueJob)
+            klass.included_modules.include?(::Resque::Plugins::UniqueJob)
           rescue
             false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
           end     # so resque-loner should not start throwing up when that happens.
