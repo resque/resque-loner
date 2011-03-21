@@ -2,6 +2,10 @@
 # Setup
 #
 
+require "rubygems"
+require "bundler"
+Bundler.setup
+
 load 'tasks/redis.rake'
 require 'rake/testtask'
 

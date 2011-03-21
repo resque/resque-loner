@@ -1,3 +1,8 @@
+require "rubygems"
+require "bundler"
+
+Bundler.setup
+
 require 'spec'
 require 'ruby-debug'
 require 'resque'
