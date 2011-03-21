@@ -83,7 +83,7 @@ describe "Resque" do
     end
     
     it "should mark jobs as unqueued, when they raise an exception during #perform" do
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == "OK"
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == 1
       Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
       Resque.size(:other_queue).should == 1
 
@@ -91,7 +91,7 @@ describe "Resque" do
       worker.work 0
       Resque.size(:other_queue).should == 0
 
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == "OK" # Means that the job was not queued
+      Resque.enqueue( FailingUniqueJob, "foo" ).should == 1 # Means that the job was not queued
       Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
       Resque.size(:other_queue).should == 1
     end
@@ -118,7 +118,7 @@ describe "Resque" do
       
       Resque.remove_queue(:other_queue)
       
-      Resque.enqueue(SomeUniqueJob, "foo").should == "OK"
+      Resque.enqueue(SomeUniqueJob, "foo").should == 1
     end
     
   end
