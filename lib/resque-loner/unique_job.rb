@@ -7,16 +7,16 @@ require 'digest/md5'
 module Resque
   module Plugins
     module UniqueJob
-    
+
       def self.included(base)
         base.extend         ClassMethods
         base.class_eval do
           base.send(:extend, Resque::Helpers)
         end
       end # self.included
-    
+
       module ClassMethods
-    
+
 
         #
         #  Payload is what Resque stored for this job along with the job's class name.
@@ -34,16 +34,17 @@ module Resque
           digest
         end
       end # ClassMethods
-    
-    
+
+
     end
   end
 end
+
 module Resque
   module Plugins
     module Loner
       class UniqueJob
-        
+
         include Resque::Plugins::UniqueJob
 
         def self.inherited(host)

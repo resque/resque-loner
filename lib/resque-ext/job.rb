@@ -5,8 +5,8 @@
 # 
 module Resque
   class Job
-    
-    
+
+
     #
     #  Overwriting original create method to mark an item as queued
     #  after Resque::Job.create has called Resque.push
@@ -18,7 +18,7 @@ module Resque
       Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
       job
     end
-    
+
     #
     #  Overwriting original reserve method to mark an item as unqueued
     #
@@ -27,7 +27,7 @@ module Resque
       Resque::Plugins::Loner::Helpers.mark_loner_as_unqueued( queue, item ) if item
       item
     end
-    
+
     #
     #  Overwriting original destroy method to mark all destroyed jobs as unqueued.
     #  Because the original method only returns the amount of jobs destroyed, but not 
@@ -38,7 +38,7 @@ module Resque
       Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args)
       destroy_without_loner(queue, klass, *args)
     end
-    
+
     #
     # Chain..
     #
