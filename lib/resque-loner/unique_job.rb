@@ -25,7 +25,11 @@ module Resque
         def redis_key(payload)
           payload = decode(encode(payload)) # This is the cycle the data goes when being enqueued/dequeued
           job  = payload[:class] || payload["class"]
-          args = payload[:args]  || payload["args"]
+          args = (payload[:args]  || payload["args"])
+          args.map! do |arg|
+            arg.respond_to?(:sort) ? arg.sort : arg
+          end
+
           digest = Digest::MD5.hexdigest encode(:class => job, :args => args)
           digest
         end
