@@ -6,6 +6,8 @@ require "rubygems"
 require "bundler"
 Bundler.setup
 
+require 'rspec/core/rake_task'
+
 load 'tasks/redis.rake'
 require 'rake/testtask'
 
@@ -24,8 +26,9 @@ end
 task :default => :spec
 
 desc "Run specs for resque-loner"
-task :spec do
-  exec "spec spec"
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = "spec/**/*_spec.rb"
+  t.rspec_opts = %w(-fd -c)
 end
 
 desc "Run resque's test suite to make sure we did not break anything"
