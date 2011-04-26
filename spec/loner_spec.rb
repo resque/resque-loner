@@ -48,7 +48,7 @@ describe "Resque" do
       Resque.size(:some_queue).should == 2
     end
 
-    it "only one of the same job sits in a queue" do
+    it "should allow only one of the same job to sit in a queue" do
       Resque.enqueue SomeUniqueJob, "foo"
       Resque.enqueue SomeUniqueJob, "foo"
       Resque.size(:other_queue).should == 1
@@ -99,16 +99,14 @@ describe "Resque" do
     end
 
     it "should mark jobs as unqueued, when they raise an exception during #perform" do
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == 1
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
+      2.times { Resque.enqueue( FailingUniqueJob, "foo" ) }
       Resque.size(:other_queue).should == 1
 
       worker = Resque::Worker.new(:other_queue)
       worker.work 0
       Resque.size(:other_queue).should == 0
 
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == 1 # Means that the job was not queued
-      Resque.enqueue( FailingUniqueJob, "foo" ).should == "EXISTED"
+      2.times { Resque.enqueue( FailingUniqueJob, "foo" ) }
       Resque.size(:other_queue).should == 1
     end
 
@@ -134,7 +132,8 @@ describe "Resque" do
 
       Resque.remove_queue(:other_queue)
 
-      Resque.enqueue(SomeUniqueJob, "foo").should == 1
+      Resque.enqueue(SomeUniqueJob, "foo")
+      Resque.size(:other_queue).should == 1
     end
 
   end

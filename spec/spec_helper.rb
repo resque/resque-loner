@@ -1,14 +1,12 @@
-require "rubygems"
-require "bundler"
+require 'rubygems'
+require 'bundler/setup'
+require 'rspec'
 
-Bundler.setup
-
-require 'spec'
 require 'ruby-debug'
 require 'resque'
 require 'resque-loner'
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   config.before(:suite) do
     if !system("which redis-server")
       puts '', "** can't find `redis-server` in your path"
