@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require 'test_helper'
 require 'resque/server/test_helper'
  
 # Root path test
@@ -51,4 +51,3 @@ context "on GET to /stats/resque" do
 
   should_respond_with_success
 end
-
