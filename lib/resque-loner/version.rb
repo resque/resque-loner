@@ -1,7 +1,7 @@
 module Resque
   module Plugins
     module Loner
-      VERSION = "0.1.3"
+      VERSION = "1.0"
     end
   end
 end

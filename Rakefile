@@ -2,6 +2,8 @@
 # Setup
 #
 
+$LOAD_PATH.unshift 'lib'
+
 require "rubygems"
 require "bundler"
 Bundler.setup
@@ -11,7 +13,6 @@ require 'rspec/core/rake_task'
 load 'tasks/redis.rake'
 require 'rake/testtask'
 
-$LOAD_PATH.unshift 'lib'
 require 'resque/tasks'
 
 def command?(command)
@@ -31,11 +32,25 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = %w(-fd -c)
 end
 
-desc "Run resque's test suite to make sure we did not break anything"
-task :test do
-  rg = command?(:rg)
-  Dir['test/**/*_test.rb'].each do |f|
-    rg ? sh("rg #{f}") : ruby(f)
+# desc "Run resque's test suite to make sure we did not break anything"
+# task :test do
+#   rg = command?(:rg)
+#   Dir['test/**/*_test.rb'].each do |f|
+#     rg ? sh("rg #{f}") : ruby(f)
+#   end
+# end
+
+if command?(:rg)
+  desc "Run the test suite with rg"
+  task :test do
+    Dir['test/**/*_test.rb'].each do |f|
+      sh("rg #{f}")
+    end
+  end
+else
+  Rake::TestTask.new do |test|
+    test.libs << "test"
+    test.test_files = FileList['test/**/*_test.rb']
   end
 end
 
@@ -64,20 +79,3 @@ begin
 rescue LoadError
 end
 
-
-#
-# Publishing
-#
-
-desc "Push a new version to Gemcutter"
-task :publish do
-  require 'resque/version'
-
-  sh "gem build resque.gemspec"
-  sh "gem push resque-#{Resque::Version}.gem"
-  sh "git tag v#{Resque::Version}"
-  sh "git push origin v#{Resque::Version}"
-  sh "git push origin master"
-  sh "git clean -fd"
-  exec "rake pages"
-end
