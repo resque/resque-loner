@@ -135,6 +135,10 @@ describe "Resque" do
       Resque.enqueue(SomeUniqueJob, "foo")
       Resque.size(:other_queue).should == 1
     end
+    
+    it 'should not raise an error when deleting an already empty queue' do
+      expect { Resque.remove_queue(:other_queue) }.to_not raise_error
+    end
 
   end
 

@@ -51,7 +51,8 @@ module Resque
         end
 
         def self.cleanup_loners(queue)
-          redis.del(*redis.keys("loners:queue:#{queue}:job:*"))
+          keys = redis.keys("loners:queue:#{queue}:job:*")
+          redis.del(*keys) unless keys.empty?
         end
 
       end
