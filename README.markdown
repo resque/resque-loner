@@ -1,4 +1,3 @@
-
 Resque-Loner
 ======
 
@@ -38,12 +37,13 @@ Your queue is really full, so the job does not get executed right away. But the 
 
 At this point you will have two jobs in the queue, the second of which has no effect: You don't have to run it, once the cache has been updated for the first time. This is where resque-loner's UniqueJobs come in. If you define CacheSweeper like this:
 
-    class CacheSweeper < Resque::Plugins::Loner::UniqueJob
-       @queue = :cache_sweeps
+    class CacheSweeper
+      include Resque::Plugins::UniqueJob
+      @queue = :cache_sweeps
 
-       def self.perform(article_id)
-         # Cache Me If You Can...
-       end
+      def self.perform(article_id)
+        # Cache Me If You Can...
+      end
     end
 
 Just like that you've assured that on the :cache_sweeps queue, there can only be one CacheSweeper job for each article. Let's see what happens when you try to enqueue a couple of these jobs now:
