@@ -12,15 +12,12 @@ module Resque
     #  after Resque::Job.create has called Resque.push
     #
     def self.create_with_loner(queue, klass, *args)
-      if Resque.inline?
-        create_without_loner(queue, klass, *args)
-      else
-        item = { :class => klass.to_s, :args => args }
-        return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
-        job = create_without_loner(queue, klass, *args)
-        Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
-        job
-      end
+      return create_without_loner(queue, klass, *args) if Resque.inline?
+      item = { :class => klass.to_s, :args => args }
+      return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
+      job = create_without_loner(queue, klass, *args)
+      Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
+      job
     end
 
     #
