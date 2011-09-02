@@ -12,11 +12,15 @@ module Resque
     #  after Resque::Job.create has called Resque.push
     #
     def self.create_with_loner(queue, klass, *args)
-      item = { :class => klass.to_s, :args => args }
-      return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
-      job = create_without_loner(queue, klass, *args)
-      Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
-      job
+      if Resque.inline?
+        create_without_loner(queue, klass, *args)
+      else
+        item = { :class => klass.to_s, :args => args }
+        return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
+        job = create_without_loner(queue, klass, *args)
+        Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
+        job
+      end
     end
 
     #
@@ -24,7 +28,7 @@ module Resque
     #
     def self.reserve_with_loner(queue)
       item = reserve_without_loner(queue)
-      Resque::Plugins::Loner::Helpers.mark_loner_as_unqueued( queue, item ) if item
+      Resque::Plugins::Loner::Helpers.mark_loner_as_unqueued( queue, item ) if item && !Resque.inline?
       item
     end
 
@@ -35,7 +39,7 @@ module Resque
     #  as the original method Resque::Job.destroy. Couldn't make it any dry'er.
     #
     def self.destroy_with_loner(queue, klass, *args)
-      Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args)
+      Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args) unless Resque.inline?
       destroy_without_loner(queue, klass, *args)
     end
 
