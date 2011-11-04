@@ -1,16 +1,5 @@
 module Resque
 
-  #
-  #  Why force one job type into one queue?
-  #
-  def self.enqueue_to( queue, klass, *args )
-    Job.create(queue, klass, *args)
-  end
-
-  def self.dequeue_from( queue, klass, *args)
-    Job.destroy(queue, klass, *args)
-  end
-
   def self.enqueued?( klass, *args)
     enqueued_in?(queue_from_class(klass), klass, *args )
   end
