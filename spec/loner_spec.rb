@@ -117,8 +117,14 @@ describe "Resque" do
     end
 
     it "should report if a job is in a special queue or not" do
-      Resque.enqueue_to :special_queue, SomeUniqueJob, "foo"
+      default_queue = SomeUniqueJob.instance_variable_get(:@queue)
+      SomeUniqueJob.instance_variable_set(:@queue, :special_queue)
+
+      Resque.enqueue SomeUniqueJob, "foo"
       Resque.enqueued_in?( :special_queue, SomeUniqueJob, "foo").should be_true
+
+      SomeUniqueJob.instance_variable_set(:@queue, default_queue)
+
       Resque.enqueued?( SomeUniqueJob, "foo").should be_false
     end
 
@@ -138,30 +144,6 @@ describe "Resque" do
     
     it 'should not raise an error when deleting an already empty queue' do
       expect { Resque.remove_queue(:other_queue) }.to_not raise_error
-    end
-
-  end
-
-  describe "Queues" do
-
-    it "should allow for jobs to be queued in other queues than their default" do
-      Resque.enqueue_to :yet_another_queue, SomeJob, 22
-
-      Resque.size(:some_queue).should == 0
-      Resque.size(:yet_another_queue).should ==1
-    end
-
-    it "should allow for jobs to be dequeued from other queues than their default" do
-      Resque.enqueue_to :yet_another_queue, SomeJob, 22
-      Resque.enqueue SomeJob, 22
-
-      Resque.size(:yet_another_queue).should == 1
-      Resque.size(:some_queue).should == 1
-
-      Resque.dequeue_from :yet_another_queue, SomeJob, 22
-
-      Resque.size(:yet_another_queue).should == 0
-      Resque.size(:some_queue).should == 1
     end
 
   end
