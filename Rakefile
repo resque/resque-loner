@@ -15,6 +15,8 @@ require 'rake/testtask'
 
 require 'resque/tasks'
 
+require 'bundler/gem_tasks'
+
 def command?(command)
   system("type #{command} > /dev/null 2>&1")
 end

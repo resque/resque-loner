@@ -18,16 +18,19 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'resque', '~>1.0'
   {
-    'bundler'             => '~> 1.0.0',
-    'rake'                => '~> 0.8.7',
+    'rake'                => '> 0.8.7',
     'rack-test'           => '~> 0.5.7',
     'rspec'               => '~> 2.5.0',
+    'mock_redis'          => '~> 0.2.0',
+    'yajl-ruby'           => '~> 0.8.2'
   }.each do |lib, version|
     s.add_development_dependency lib, version
   end
 
-  s.files        = Dir.glob("{lib}/**/*") + %w(README.markdown)
-  s.require_path = 'lib'
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.require_paths = ["lib"]
 
   s.description = <<desc
 Makes sure that for special jobs, there can be only one job with the same workload in one queue.
