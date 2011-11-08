@@ -68,13 +68,6 @@ Since resque-loner keeps track of which jobs are queued in a way that allows for
     >> Resque.enqueued_in? :another_queue, CacheSweeper, 1
     => false
 
-If you want the same type of job in different queues, resque-loner lets you enqueue/dequeue to a queue of your choice:
-
-    >> Resque.enqueue_to :another_queue, CacheSweeper, 1
-    => "OK"
-    >> Resqueue.dequeue_from :another_queue, CacheSweeper, 1
-    => 1
-
 How it works
 --------
 
