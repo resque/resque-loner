@@ -117,8 +117,14 @@ describe "Resque" do
     end
 
     it "should report if a job is in a special queue or not" do
-      Resque.enqueue_to :special_queue, SomeUniqueJob, "foo"
+      default_queue = SomeUniqueJob.instance_variable_get(:@queue)
+      SomeUniqueJob.instance_variable_set(:@queue, :special_queue)
+
+      Resque.enqueue SomeUniqueJob, "foo"
       Resque.enqueued_in?( :special_queue, SomeUniqueJob, "foo").should be_true
+
+      SomeUniqueJob.instance_variable_set(:@queue, default_queue)
+
       Resque.enqueued?( SomeUniqueJob, "foo").should be_false
     end
 
