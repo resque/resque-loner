@@ -33,6 +33,23 @@ module Resque
           digest = Digest::MD5.hexdigest encode(:class => job, :args => args)
           digest
         end
+
+        #
+        # The default ttl of a locking key is -1, i.e. forever.  If for some reason you only 
+        # want the lock to be in place after a certain amount of time, override this method
+        # in your job.  For example: 
+        #
+        # class FooJob
+        #   include Resque::Plugins::UniqueJob
+        #   def self.loner_ttl
+        #     40
+        #   end
+        # end
+        #
+        def loner_ttl
+          -1
+        end
+
       end # ClassMethods
 
 
