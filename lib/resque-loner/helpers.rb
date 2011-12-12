@@ -11,7 +11,11 @@ module Resque
 
         def self.mark_loner_as_queued(queue, item)
           return unless item_is_a_unique_job?(item)
-          redis.set(unique_job_queue_key(queue, item), 1)
+          key = unique_job_queue_key(queue, item)
+          redis.set(key, 1)
+          unless(ttl=item_ttl(item)) == -1 # no need to incur overhead for default value 
+            redis.expire(key, ttl)
+          end
         end
 
         def self.mark_loner_as_unqueued(queue, job)
@@ -32,6 +36,14 @@ module Resque
           rescue
             false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
           end     # so resque-loner should not start throwing up when that happens.
+        end
+
+        def self.item_ttl(item)
+          begin
+            constantize(item[:class] || item["class"]).loner_ttl
+          rescue
+            -1
+          end
         end
 
         def self.job_destroy(queue, klass, *args)

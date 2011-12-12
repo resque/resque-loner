@@ -33,6 +33,17 @@ class DeprecatedUniqueJob < Resque::Plugins::Loner::UniqueJob
   def self.perform(foo); end
 end
 
+class UniqueJobWithTtl
+  include Resque::Plugins::UniqueJob
+  @queue = :unique_with_ttl
+
+  def self.loner_ttl
+    300
+  end
+
+  def self.perform(*args); end
+end
+
 describe "Resque" do
 
   before(:each) do
@@ -146,5 +157,12 @@ describe "Resque" do
       expect { Resque.remove_queue(:other_queue) }.to_not raise_error
     end
 
+    it 'should honor loner_ttl in the redis key' do
+      Resque.enqueue UniqueJobWithTtl
+      Resque.enqueued?(UniqueJobWithTtl).should be_true
+      k=Resque.redis.keys "loners:queue:unique_with_ttl:job:*"
+      k.length.should == 1
+      Resque.redis.ttl(k[0]).should be_within(2).of(UniqueJobWithTtl.loner_ttl)
+    end
   end
 end
