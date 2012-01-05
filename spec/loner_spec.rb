@@ -36,10 +36,7 @@ end
 class UniqueJobWithTtl
   include Resque::Plugins::UniqueJob
   @queue = :unique_with_ttl
-
-  def self.loner_ttl
-    300
-  end
+  @loner_ttl = 300
 
   def self.perform(*args); end
 end
