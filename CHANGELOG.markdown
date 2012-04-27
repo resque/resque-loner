@@ -1,3 +1,8 @@
+1.2.1
+--------------------------------
+Merged @aerodynamik's pull request. Enqueuing and marking as
+enqueued as an atomic operation. 
+
 1.2.0
 --------------------------------
 Thanks @unclebilly for your pull request. Resque-loner now supports
