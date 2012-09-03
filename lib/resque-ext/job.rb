@@ -16,10 +16,12 @@ module Resque
       item = { :class => klass.to_s, :args => args }
       return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
       # multi block returns array of keys
+      create_return_value = false
       Resque.redis.multi do
-        create_without_loner(queue, klass, *args)
+        create_return_value = create_without_loner(queue, klass, *args)
         Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
       end.first
+      create_return_value
     end
 
     #
