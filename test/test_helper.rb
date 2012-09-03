@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'bundler/setup'
 
 $dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift $dir + '/../lib'
@@ -7,6 +8,7 @@ require 'test/unit'
 
 require 'redis/namespace'
 require 'resque'
+require 'resque-loner'
 
 begin
   require 'leftright'
