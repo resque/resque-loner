@@ -13,7 +13,7 @@ module Resque
           return unless item_is_a_unique_job?(item)
           key = unique_job_queue_key(queue, item)
           redis.set(key, 1)
-          unless(ttl=item_ttl(item)) == -1 # no need to incur overhead for default value 
+          unless(ttl=item_ttl(item)) == -1 # no need to incur overhead for default value
             redis.expire(key, ttl)
           end
         end
@@ -21,7 +21,11 @@ module Resque
         def self.mark_loner_as_unqueued(queue, job)
           item = job.is_a?(Resque::Job) ? job.payload : job
           return unless item_is_a_unique_job?(item)
-          redis.del(unique_job_queue_key(queue, item))
+          unless (ttl=loner_lock_after_execution_period(item)) == 0
+            redis.expire(unique_job_queue_key(queue, item), ttl)
+          else
+            redis.del(unique_job_queue_key(queue, item))
+          end
         end
 
         def self.unique_job_queue_key(queue, item)
@@ -43,6 +47,14 @@ module Resque
             constantize(item[:class] || item["class"]).loner_ttl
           rescue
             -1
+          end
+        end
+
+        def self.loner_lock_after_execution_period(item)
+          begin
+            constantize(item[:class] || item["class"]).loner_lock_after_execution_period
+          rescue
+            0
           end
         end
 
