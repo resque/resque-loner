@@ -1,12 +1,14 @@
 require 'rubygems'
-require 'bundler'
-Bundler.setup(:default, :test)
-Bundler.require(:default, :test)
+require 'bundler/setup'
 
-dir = File.dirname(File.expand_path(__FILE__))
-$LOAD_PATH.unshift dir + '/../lib'
+$dir = File.dirname(File.expand_path(__FILE__))
+$LOAD_PATH.unshift $dir + '/../lib'
 $TESTING = true
 require 'test/unit'
+
+require 'redis/namespace'
+require 'resque'
+require 'resque-loner'
 
 begin
   require 'leftright'
@@ -39,16 +41,26 @@ at_exit do
     exit_code = Test::Unit::AutoRunner.run
   end
 
-  pid = `ps -A -o pid,command | grep [r]edis-test`.split(" ")[0]
+  processes = `ps -A -o pid,command | grep [r]edis-test`.split("\n")
+  pids = processes.map { |process| process.split(" ")[0] }
   puts "Killing test redis server..."
-  `rm -f #{dir}/dump.rdb`
-  Process.kill("KILL", pid.to_i)
+  pids.each { |pid| Process.kill("TERM", pid.to_i) }
+  system("rm -f #{$dir}/dump.rdb #{$dir}/dump-cluster.rdb")
   exit exit_code
 end
 
-puts "Starting redis for testing at localhost:9736..."
-`redis-server #{dir}/redis-test.conf`
-Resque.redis = 'localhost:9736'
+if ENV.key? 'RESQUE_DISTRIBUTED'
+  require 'redis/distributed'
+  puts "Starting redis for testing at localhost:9736 and localhost:9737..."
+  `redis-server #{$dir}/redis-test.conf`
+  `redis-server #{$dir}/redis-test-cluster.conf`
+  r = Redis::Distributed.new(['redis://localhost:9736', 'redis://localhost:9737'])
+  Resque.redis = Redis::Namespace.new :resque, :redis => r
+else
+  puts "Starting redis for testing at localhost:9736..."
+  `redis-server #{$dir}/redis-test.conf`
+  Resque.redis = 'localhost:9736'
+end
 
 
 ##
@@ -134,15 +146,31 @@ ensure
   Resque::Failure.backend = previous_backend
 end
 
+require 'time'
+
 class Time
   # Thanks, Timecop
   class << self
+    attr_accessor :fake_time
+
     alias_method :now_without_mock_time, :now
 
-    def now_with_mock_time
-      $fake_time || now_without_mock_time
+    def now
+      fake_time || now_without_mock_time
     end
-
-    alias_method :now, :now_with_mock_time
   end
+
+  self.fake_time = nil
+end
+
+def capture_stderr
+  # The output stream must be an IO-like object. In this case we capture it in
+  # an in-memory IO object so we can return the string value. You can assign any
+  # IO object here.
+  previous_stderr, $stderr = $stderr, StringIO.new
+  yield
+  $stderr.string
+ensure
+  # Restore the previous value of stderr (typically equal to STDERR).
+  $stderr = previous_stderr
 end

@@ -36,8 +36,8 @@ module Resque
 
         #
         # The default ttl of a locking key is -1, i.e. forever.  If for some reason you only
-        # want the lock to be in place after a certain amount of time, just set a ttl for
-        # for your job.  For example:
+        # want the lock to be in place after a certain amount of time, just set a ttl (in
+        # seconds) for your job.  For example:
         #
         # class FooJob
         #   include Resque::Plugins::UniqueJob

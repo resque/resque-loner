@@ -11,10 +11,8 @@ class SomeJob
   @queue = :some_queue
 end
 
-class SomeUniqueJob 
-
+class SomeUniqueJob
   include Resque::Plugins::UniqueJob
-
   @queue = :other_queue
   def self.perform(foo); end
 end
@@ -28,7 +26,6 @@ class FailingUniqueJob
 end
 
 class DeprecatedUniqueJob < Resque::Plugins::Loner::UniqueJob
-
   @queue = :other_queue
   def self.perform(foo); end
 end
@@ -149,7 +146,7 @@ describe "Resque" do
       Resque.enqueue(SomeUniqueJob, "foo")
       Resque.size(:other_queue).should == 1
     end
-    
+
     it 'should not raise an error when deleting an already empty queue' do
       expect { Resque.remove_queue(:other_queue) }.to_not raise_error
     end
