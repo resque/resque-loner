@@ -20,7 +20,7 @@ Tests
 -----------
 To make sure this plugin works on your installation, you should run the tests. resque-loner is tested in RSpec, but it also includes resque's original testsuite. You can run all tests specific to resque-loner with `rake spec`.
 
-To make sure the plugin did not break resque, you can run `rake test` (the standard resque test suite). This runs all tests from the 1.10.0 version of resque, so make sure you have that version of resque installed, when you run the resque-tests.
+To make sure the plugin did not break resque, you can run `rake test` (the standard resque test suite). This runs all tests from the 1.22.0 version of resque, so make sure you have that version of resque installed, when you run the resque-tests.
 
 Example
 --------
