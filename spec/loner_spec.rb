@@ -11,10 +11,8 @@ class SomeJob
   @queue = :some_queue
 end
 
-class SomeUniqueJob 
-
+class SomeUniqueJob
   include Resque::Plugins::UniqueJob
-
   @queue = :other_queue
   def self.perform(foo); end
 end
@@ -28,7 +26,6 @@ class FailingUniqueJob
 end
 
 class DeprecatedUniqueJob < Resque::Plugins::Loner::UniqueJob
-
   @queue = :other_queue
   def self.perform(foo); end
 end
@@ -37,7 +34,13 @@ class UniqueJobWithTtl
   include Resque::Plugins::UniqueJob
   @queue = :unique_with_ttl
   @loner_ttl = 300
+  def self.perform(*args); end
+end
 
+class UniqueJobWithLockAfterExecution
+  include Resque::Plugins::UniqueJob
+  @queue = :unique_with_loner_lock_after_execution_period
+  @loner_lock_after_execution_period = 150
   def self.perform(*args); end
 end
 
@@ -149,7 +152,7 @@ describe "Resque" do
       Resque.enqueue(SomeUniqueJob, "foo")
       Resque.size(:other_queue).should == 1
     end
-    
+
     it 'should not raise an error when deleting an already empty queue' do
       expect { Resque.remove_queue(:other_queue) }.to_not raise_error
     end
@@ -160,6 +163,26 @@ describe "Resque" do
       k=Resque.redis.keys "loners:queue:unique_with_ttl:job:*"
       k.length.should == 1
       Resque.redis.ttl(k[0]).should be_within(2).of(UniqueJobWithTtl.loner_ttl)
+    end
+
+    it "should not allow the same job to be enqueued after execution if loner_lock_after_execution_period is set" do
+      Resque.enqueue UniqueJobWithLockAfterExecution, "foo"
+      Resque.enqueue UniqueJobWithLockAfterExecution, "foo"
+      Resque.size(:unique_with_loner_lock_after_execution_period).should == 1
+
+      Resque.reserve(:unique_with_loner_lock_after_execution_period)
+      Resque.size(:unique_with_loner_lock_after_execution_period).should == 0
+
+      Resque.enqueue UniqueJobWithLockAfterExecution, "foo"
+      Resque.size(:unique_with_loner_lock_after_execution_period).should == 0
+    end
+
+    it 'should honor loner_lock_after_execution_period in the redis key' do
+      Resque.enqueue UniqueJobWithLockAfterExecution
+      Resque.reserve(:unique_with_loner_lock_after_execution_period)
+      k=Resque.redis.keys "loners:queue:unique_with_loner_lock_after_execution_period:job:*"
+      k.length.should == 1
+      Resque.redis.ttl(k[0]).should be_within(2).of(UniqueJobWithLockAfterExecution.loner_lock_after_execution_period)
     end
   end
 end

@@ -36,8 +36,8 @@ module Resque
 
         #
         # The default ttl of a locking key is -1, i.e. forever.  If for some reason you only
-        # want the lock to be in place after a certain amount of time, just set a ttl for
-        # for your job.  For example:
+        # want the lock to be in place after a certain amount of time, just set a ttl (in
+        # seconds) for your job.  For example:
         #
         # class FooJob
         #   include Resque::Plugins::UniqueJob
@@ -47,6 +47,21 @@ module Resque
         #
         def loner_ttl
           @loner_ttl || -1
+        end
+
+        #
+        # The default ttl of a persisting key is 0, i.e. immediately deleted.
+        # You can set loner_lock_after_execution_period if you want to block the execution
+        # of the job for a certain amount of time (in seconds).  For example:
+        #
+        # class FooJob
+        #   include Resque::Plugins::UniqueJob
+        #   @loner_lock_after_execution_period = 40
+        #   end
+        # end
+        #
+        def loner_lock_after_execution_period
+          @loner_lock_after_execution_period || 0
         end
 
       end # ClassMethods
