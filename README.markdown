@@ -16,6 +16,10 @@ First install the gem:
 Then include it in your app:
 
     require 'resque-loner'
+    
+Or alternatively add it to your Gemfile
+
+    gem 'resque-loner', require: 'resque-loner'
 
 
 Tests
