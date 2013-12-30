@@ -1,8 +1,10 @@
+require 'resque-loner/legacy_helpers'
+
 module Resque
   module Plugins
     module Loner
       class Helpers
-        extend Resque::Helpers
+        extend Resque::Plugins::Loner::LegacyHelpers
 
         def self.loner_queued?(queue, item)
           return false unless item_is_a_unique_job?(item)
