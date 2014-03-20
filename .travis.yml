@@ -7,5 +7,6 @@ env:
   global:
   - RESQUE_SCHEDULER_DISABLE_TEST_REDIS_SERVER=1
   - COVERAGE=1
+  - secure: c9PvRm9w0ewSsS1QDogwPCvSXO+xgHm0mcVA+iiUknezitNjDwaTuBqGtLJ/PjMnQ16QfG0ApDvSqqOw9rSjwM7meCqiQZlJRqqyd547PNhbP6J56mtuXvxMM7wvulK/aLeIYwDeON0Do52FSY4l2/oN2QvA2hIvX8RTDyrfdaA=
 services:
 - redis-server
