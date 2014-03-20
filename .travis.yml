@@ -6,5 +6,6 @@ rvm:
 env:
   global:
   - RESQUE_SCHEDULER_DISABLE_TEST_REDIS_SERVER=1
+  - COVERAGE=1
 services:
 - redis-server
