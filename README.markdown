@@ -1,5 +1,5 @@
 [![Build
-Status](https://secure.travis-ci.org/jayniz/resque-loner.png?branch=master)](https://travis-ci.org/jayniz/resque-loner)
+Status](https://secure.travis-ci.org/resque/resque-loner.png?branch=master)](https://travis-ci.org/resque/resque-loner)
 Resque-Loner
 ======
 
