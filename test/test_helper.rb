@@ -15,17 +15,15 @@ begin
 rescue LoadError
 end
 
-
 #
 # make sure we can run redis
 #
 
-if !system("which redis-server")
+if !system('which redis-server')
   puts '', "** can't find `redis-server` in your path"
-  puts "** try running `sudo rake install`"
+  puts '** try running `sudo rake install`'
   abort ''
 end
-
 
 #
 # start our own redis when the tests start,
@@ -33,7 +31,7 @@ end
 #
 
 at_exit do
-  next if $!
+  next if $ERROR_INFO
 
   if defined?(MiniTest)
     exit_code = MiniTest::Unit.new.run(ARGV)
@@ -42,26 +40,25 @@ at_exit do
   end
 
   processes = `ps -A -o pid,command | grep [r]edis-test`.split("\n")
-  pids = processes.map { |process| process.split(" ")[0] }
-  puts "Killing test redis server..."
-  pids.each { |pid| Process.kill("TERM", pid.to_i) }
+  pids = processes.map { |process| process.split(' ')[0] }
+  puts 'Killing test redis server...'
+  pids.each { |pid| Process.kill('TERM', pid.to_i) }
   system("rm -f #{$dir}/dump.rdb #{$dir}/dump-cluster.rdb")
   exit exit_code
 end
 
 if ENV.key? 'RESQUE_DISTRIBUTED'
   require 'redis/distributed'
-  puts "Starting redis for testing at localhost:9736 and localhost:9737..."
+  puts 'Starting redis for testing at localhost:9736 and localhost:9737...'
   `redis-server #{$dir}/redis-test.conf`
   `redis-server #{$dir}/redis-test-cluster.conf`
   r = Redis::Distributed.new(['redis://localhost:9736', 'redis://localhost:9737'])
-  Resque.redis = Redis::Namespace.new :resque, :redis => r
+  Resque.redis = Redis::Namespace.new :resque, redis: r
 else
-  puts "Starting redis for testing at localhost:9736..."
+  puts 'Starting redis for testing at localhost:9736...'
   `redis-server #{$dir}/redis-test.conf`
   Resque.redis = 'localhost:9736'
 end
-
 
 ##
 # test/spec/mini 3
@@ -73,13 +70,17 @@ def context(*args, &block)
   require 'test/unit'
   klass = Class.new(defined?(ActiveSupport::TestCase) ? ActiveSupport::TestCase : Test::Unit::TestCase) do
     def self.test(name, &block)
-      define_method("test_#{name.gsub(/\W/,'_')}", &block) if block
+      define_method("test_#{name.gsub(/\W/, '_')}", &block) if block
     end
     def self.xtest(*args) end
-    def self.setup(&block) define_method(:setup, &block) end
-    def self.teardown(&block) define_method(:teardown, &block) end
+    def self.setup(&block)
+      define_method(:setup, &block)
+    end
+    def self.teardown(&block)
+      define_method(:teardown, &block)
+    end
   end
-  (class << klass; self end).send(:define_method, :name) { name.gsub(/\W/,'_') }
+  (class << klass; self end).send(:define_method, :name) { name.gsub(/\W/, '_') }
   klass.class_eval &block
   # XXX: In 1.8.x, not all tests will run unless anonymous classes are kept in scope.
   ($test_classes ||= []) << klass
@@ -116,7 +117,7 @@ end
 
 class BadJob
   def self.perform
-    raise "Bad job!"
+    fail 'Bad job!'
   end
 end
 
@@ -128,13 +129,13 @@ end
 
 class BadJobWithSyntaxError
   def self.perform
-    raise SyntaxError, "Extra Bad job!"
+    fail SyntaxError, 'Extra Bad job!'
   end
 end
 
 class BadFailureBackend < Resque::Failure::Base
   def save
-    raise Exception.new("Failure backend error")
+    fail Exception.new('Failure backend error')
   end
 end
 

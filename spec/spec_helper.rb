@@ -1,28 +1,26 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'English'
+require 'simplecov'
+
 require 'rspec'
 
-require 'ruby-debug'
 require 'resque'
 require 'resque-loner'
 
+module Support
+  class << self
+    attr_accessor :redis_pid
+  end
+end
+
 RSpec.configure do |config|
   config.before(:suite) do
-    if !system("which redis-server")
-      puts '', "** can't find `redis-server` in your path"
-      puts "** try running `sudo rake install`"
-      abort ''
+    unless ENV['RESQUE_SCHEDULER_DISABLE_TEST_REDIS_SERVER']
+      # Start our own Redis when the tests start. RedisInstance will take care of
+      # starting and stopping.
+      require File.expand_path('../support/redis_instance', __FILE__)
+      RedisInstance.run!
     end
-    puts "Starting redis for testing at localhost:9736..."
-    `redis-server #{File.dirname(File.expand_path(__FILE__))}/redis-test.conf`
-    puts  "redis-server #{File.dirname(File.expand_path(__FILE__))}/redis-test.conf"
-    Resque.redis = 'localhost:9736'
-  end
-
-  config.after(:suite) do
-    pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
-    puts "Killing test redis server #{pid}..."
-    `rm -f #{File.dirname(File.expand_path(__FILE__))}/dump.rdb`
-    Process.kill("KILL", pid.to_i)
   end
 end
