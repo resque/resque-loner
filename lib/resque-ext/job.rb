@@ -20,7 +20,7 @@ module Resque
       Resque.redis.multi do
         create_return_value = create_without_loner(queue, klass, *args)
         Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
-      end.first
+      end
       create_return_value
     end
 
