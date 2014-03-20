@@ -7,7 +7,7 @@ require 'multi_json'
 # OkJson won't work because it doesn't serialize symbols
 # in the same way yajl and json do.
 if MultiJson.engine.to_s == 'MultiJson::Engines::OkJson'
-  raise "Please install the yajl-ruby or json gem"
+  fail 'Please install the yajl-ruby or json gem'
 end
 
 module Resque
