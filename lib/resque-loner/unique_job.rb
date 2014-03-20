@@ -1,4 +1,5 @@
 require 'digest/md5'
+require 'resque-loner/helpers'
 
 #
 #  If you want your job to be unique, include this module in it. If you wish,
@@ -11,7 +12,7 @@ module Resque
       def self.included(base)
         base.extend         ClassMethods
         base.class_eval do
-          base.send(:extend, Resque::Helpers)
+          base.send(:extend, Resque::Plugins::Loner::LegacyHelpers)
         end
       end # self.included
 
