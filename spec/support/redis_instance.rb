@@ -96,7 +96,7 @@ class RedisInstance # rubocop:disable ClassLength
     end
 
     def pid_file
-      '/tmp/redis-scheduler-test.pid'
+      '/tmp/redis-loner-test.pid'
     end
 
     def config
