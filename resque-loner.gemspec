@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'resque', '~>1.0'
 
   %w(
+    airbrake
     i18n
     mocha
     mock_redis
