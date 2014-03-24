@@ -2,25 +2,23 @@
 #  Since there were not enough hooks to hook into, I have to overwrite
 #  3 methods of Resque::Job - the rest of the implementation is in the
 #  proper Plugin namespace.
-# 
+#
 module Resque
   class Job
-
-
     #
     #  Overwriting original create method to mark an item as queued
     #  after Resque::Job.create has called Resque.push
     #
     def self.create_with_loner(queue, klass, *args)
       return create_without_loner(queue, klass, *args) if Resque.inline?
-      item = { :class => klass.to_s, :args => args }
-      return "EXISTED" if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
+      item = { class: klass.to_s, args: args }
+      return 'EXISTED' if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
       # multi block returns array of keys
       create_return_value = false
       Resque.redis.multi do
         create_return_value = create_without_loner(queue, klass, *args)
         Resque::Plugins::Loner::Helpers.mark_loner_as_queued(queue, item)
-      end.first
+      end
       create_return_value
     end
 
@@ -29,13 +27,13 @@ module Resque
     #
     def self.reserve_with_loner(queue)
       item = reserve_without_loner(queue)
-      Resque::Plugins::Loner::Helpers.mark_loner_as_unqueued( queue, item ) if item && !Resque.inline?
+      Resque::Plugins::Loner::Helpers.mark_loner_as_unqueued(queue, item) if item && !Resque.inline?
       item
     end
 
     #
     #  Overwriting original destroy method to mark all destroyed jobs as unqueued.
-    #  Because the original method only returns the amount of jobs destroyed, but not 
+    #  Because the original method only returns the amount of jobs destroyed, but not
     #  the jobs themselves. Hence Resque::Plugins::Loner::Helpers.job_destroy looks almost
     #  as the original method Resque::Job.destroy. Couldn't make it any dry'er.
     #

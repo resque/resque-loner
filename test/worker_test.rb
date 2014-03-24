@@ -1,6 +1,6 @@
 require 'test_helper'
 
-context "Resque::Worker" do
+context 'Resque::Worker' do
   setup do
     Resque.redis.flushall
 
@@ -12,28 +12,28 @@ context "Resque::Worker" do
     Resque::Job.create(:jobs, SomeJob, 20, '/tmp')
   end
 
-  test "can fail jobs" do
+  test 'can fail jobs' do
     Resque::Job.create(:jobs, BadJob)
     @worker.work(0)
     assert_equal 1, Resque::Failure.count
   end
 
-  test "failed jobs report exception and message" do
+  test 'failed jobs report exception and message' do
     Resque::Job.create(:jobs, BadJobWithSyntaxError)
     @worker.work(0)
     assert_equal('SyntaxError', Resque::Failure.all['exception'])
     assert_equal('Extra Bad job!', Resque::Failure.all['error'])
   end
 
-  test "does not allow exceptions from failure backend to escape" do
+  test 'does not allow exceptions from failure backend to escape' do
     job = Resque::Job.new(:jobs, {})
     with_failure_backend BadFailureBackend do
       @worker.perform job
     end
   end
 
-  test "fails uncompleted jobs on exit" do
-    job = Resque::Job.new(:jobs, {'class' => 'GoodJob', 'args' => "blah"})
+  test 'fails uncompleted jobs on exit' do
+    job = Resque::Job.new(:jobs, 'class' => 'GoodJob', 'args' => 'blah')
     @worker.working_on(job)
     @worker.unregister_worker
     assert_equal 1, Resque::Failure.count
@@ -49,8 +49,8 @@ context "Resque::Worker" do
     end
   end
 
-  test "fails uncompleted jobs on exit, and calls failure hook" do
-    job = Resque::Job.new(:jobs, {'class' => 'SimpleJobWithFailureHandling', 'args' => ""})
+  test 'fails uncompleted jobs on exit, and calls failure hook' do
+    job = Resque::Job.new(:jobs, 'class' => 'SimpleJobWithFailureHandling', 'args' => '')
     @worker.working_on(job)
     @worker.unregister_worker
     assert_equal 1, Resque::Failure.count
@@ -69,18 +69,18 @@ context "Resque::Worker" do
     end
 
     def self.perform
-      raise Exception.new
+      fail Exception.new
     end
   end
 
-  test "only calls failure hook once on exception" do
-    job = Resque::Job.new(:jobs, {'class' => 'SimpleFailingJob', 'args' => ""})
+  test 'only calls failure hook once on exception' do
+    job = Resque::Job.new(:jobs, 'class' => 'SimpleFailingJob', 'args' => '')
     @worker.perform(job)
     assert_equal 1, Resque::Failure.count
     assert_equal 1, SimpleFailingJob.exception_count
   end
 
-  test "can peek at failed jobs" do
+  test 'can peek at failed jobs' do
     10.times { Resque::Job.create(:jobs, BadJob) }
     @worker.work(0)
     assert_equal 10, Resque::Failure.count
@@ -88,7 +88,7 @@ context "Resque::Worker" do
     assert_equal 10, Resque::Failure.all(0, 20).size
   end
 
-  test "can clear failed jobs" do
+  test 'can clear failed jobs' do
     Resque::Job.create(:jobs, BadJob)
     @worker.work(0)
     assert_equal 1, Resque::Failure.count
@@ -96,7 +96,7 @@ context "Resque::Worker" do
     assert_equal 0, Resque::Failure.count
   end
 
-  test "catches exceptional jobs" do
+  test 'catches exceptional jobs' do
     Resque::Job.create(:jobs, BadJob)
     Resque::Job.create(:jobs, BadJob)
     @worker.process
@@ -105,13 +105,13 @@ context "Resque::Worker" do
     assert_equal 2, Resque::Failure.count
   end
 
-  test "strips whitespace from queue names" do
-    queues = "critical, high, low".split(',')
+  test 'strips whitespace from queue names' do
+    queues = 'critical, high, low'.split(',')
     worker = Resque::Worker.new(*queues)
     assert_equal %w( critical high low ), worker.queues
   end
 
-  test "can work on multiple queues" do
+  test 'can work on multiple queues' do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
 
@@ -125,12 +125,12 @@ context "Resque::Worker" do
     assert_equal 0, Resque.size(:high)
   end
 
-  test "can work on all queues" do
+  test 'can work on all queues' do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
     Resque::Job.create(:blahblah, GoodJob)
 
-    worker = Resque::Worker.new("*")
+    worker = Resque::Worker.new('*')
 
     worker.work(0)
     assert_equal 0, Resque.size(:high)
@@ -138,13 +138,13 @@ context "Resque::Worker" do
     assert_equal 0, Resque.size(:blahblah)
   end
 
-  test "can work with wildcard at the end of the list" do
+  test 'can work with wildcard at the end of the list' do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
     Resque::Job.create(:blahblah, GoodJob)
     Resque::Job.create(:beer, GoodJob)
 
-    worker = Resque::Worker.new(:critical, :high, "*")
+    worker = Resque::Worker.new(:critical, :high, '*')
 
     worker.work(0)
     assert_equal 0, Resque.size(:high)
@@ -153,13 +153,13 @@ context "Resque::Worker" do
     assert_equal 0, Resque.size(:beer)
   end
 
-  test "can work with wildcard at the middle of the list" do
+  test 'can work with wildcard at the middle of the list' do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
     Resque::Job.create(:blahblah, GoodJob)
     Resque::Job.create(:beer, GoodJob)
 
-    worker = Resque::Worker.new(:critical, "*", :high)
+    worker = Resque::Worker.new(:critical, '*', :high)
 
     worker.work(0)
     assert_equal 0, Resque.size(:high)
@@ -168,12 +168,12 @@ context "Resque::Worker" do
     assert_equal 0, Resque.size(:beer)
   end
 
-  test "processes * queues in alphabetical order" do
+  test 'processes * queues in alphabetical order' do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
     Resque::Job.create(:blahblah, GoodJob)
 
-    worker = Resque::Worker.new("*")
+    worker = Resque::Worker.new('*')
     processed_queues = []
 
     worker.work(0) do |job|
@@ -183,17 +183,17 @@ context "Resque::Worker" do
     assert_equal %w( jobs high critical blahblah ).sort, processed_queues
   end
 
-  test "has a unique id" do
-    assert_equal "#{`hostname`.chomp}:#{$$}:jobs", @worker.to_s
+  test 'has a unique id' do
+    assert_equal "#{`hostname`.chomp}:#{$PROCESS_ID}:jobs", @worker.to_s
   end
 
-  test "complains if no queues are given" do
+  test 'complains if no queues are given' do
     assert_raise Resque::NoQueueError do
       Resque::Worker.new
     end
   end
 
-  test "fails if a job class has no `perform` method" do
+  test 'fails if a job class has no `perform` method' do
     worker = Resque::Worker.new(:perform_less)
     Resque::Job.create(:perform_less, Object)
 
@@ -216,7 +216,7 @@ context "Resque::Worker" do
     assert_equal [], Resque.workers
   end
 
-  test "removes worker with stringified id" do
+  test 'removes worker with stringified id' do
     @worker.work(0) do
       worker_id = Resque.workers[0].to_s
       Resque.remove_worker(worker_id)
@@ -224,38 +224,38 @@ context "Resque::Worker" do
     end
   end
 
-  test "records what it is working on" do
+  test 'records what it is working on' do
     @worker.work(0) do
       task = @worker.job
-      assert_equal({"args"=>[20, "/tmp"], "class"=>"SomeJob"}, task['payload'])
+      assert_equal({ 'args' => [20, '/tmp'], 'class' => 'SomeJob' }, task['payload'])
       assert task['run_at']
       assert_equal 'jobs', task['queue']
     end
   end
 
-  test "clears its status when not working on anything" do
+  test 'clears its status when not working on anything' do
     @worker.work(0)
     assert_equal Hash.new, @worker.job
   end
 
-  test "knows when it is working" do
+  test 'knows when it is working' do
     @worker.work(0) do
       assert @worker.working?
     end
   end
 
-  test "knows when it is idle" do
+  test 'knows when it is idle' do
     @worker.work(0)
     assert @worker.idle?
   end
 
-  test "knows who is working" do
+  test 'knows who is working' do
     @worker.work(0) do
       assert_equal [@worker], Resque.working
     end
   end
 
-  test "keeps track of how many jobs it has processed" do
+  test 'keeps track of how many jobs it has processed' do
     Resque::Job.create(:jobs, BadJob)
     Resque::Job.create(:jobs, BadJob)
 
@@ -266,7 +266,7 @@ context "Resque::Worker" do
     assert_equal 3, @worker.processed
   end
 
-  test "keeps track of how many failures it has seen" do
+  test 'keeps track of how many failures it has seen' do
     Resque::Job.create(:jobs, BadJob)
     Resque::Job.create(:jobs, BadJob)
 
@@ -277,34 +277,34 @@ context "Resque::Worker" do
     assert_equal 2, @worker.failed
   end
 
-  test "stats are erased when the worker goes away" do
+  test 'stats are erased when the worker goes away' do
     @worker.work(0)
     assert_equal 0, @worker.processed
     assert_equal 0, @worker.failed
   end
 
-  test "knows when it started" do
+  test 'knows when it started' do
     time = Time.now
     @worker.work(0) do
       assert Time.parse(@worker.started) - time < 0.1
     end
   end
 
-  test "knows whether it exists or not" do
+  test 'knows whether it exists or not' do
     @worker.work(0) do
       assert Resque::Worker.exists?(@worker)
       assert !Resque::Worker.exists?('blah-blah')
     end
   end
 
-  test "sets $0 while working" do
+  test 'sets $0 while working' do
     @worker.work(0) do
       ver = Resque::Version
-      assert_equal "resque-#{ver}: Processing jobs since #{Time.now.to_i}", $0
+      assert_equal "resque-#{ver}: Processing jobs since #{Time.now.to_i}", $PROGRAM_NAME
     end
   end
 
-  test "can be found" do
+  test 'can be found' do
     @worker.work(0) do
       found = Resque::Worker.find(@worker.to_s)
       assert_equal @worker.to_s, found.to_s
@@ -320,7 +320,7 @@ context "Resque::Worker" do
     end
   end
 
-  test "cleans up dead worker info on start (crash recovery)" do
+  test 'cleans up dead worker info on start (crash recovery)' do
     # first we fake out two dead workers
     workerA = Resque::Worker.new(:jobs)
     workerA.instance_variable_set(:@to_s, "#{`hostname`.chomp}:1:jobs")
@@ -338,20 +338,20 @@ context "Resque::Worker" do
     end
   end
 
-  test "worker_pids returns pids" do
+  test 'worker_pids returns pids' do
     known_workers = @worker.worker_pids
     assert !known_workers.empty?
   end
 
-  test "Processed jobs count" do
+  test 'Processed jobs count' do
     @worker.work(0)
     assert_equal 1, Resque.info[:processed]
   end
 
-  test "Will call a before_first_fork hook only once" do
+  test 'Will call a before_first_fork hook only once' do
     Resque.redis.flushall
     $BEFORE_FORK_CALLED = 0
-    Resque.before_first_fork = Proc.new { $BEFORE_FORK_CALLED += 1 }
+    Resque.before_first_fork = proc { $BEFORE_FORK_CALLED += 1 }
     workerA = Resque::Worker.new(:jobs)
     Resque::Job.create(:jobs, SomeJob, 20, '/tmp')
 
@@ -365,10 +365,10 @@ context "Resque::Worker" do
 #     assert_equal 1, $BEFORE_FORK_CALLED
   end
 
-  test "Will call a before_fork hook before forking" do
+  test 'Will call a before_fork hook before forking' do
     Resque.redis.flushall
     $BEFORE_FORK_CALLED = false
-    Resque.before_fork = Proc.new { $BEFORE_FORK_CALLED = true }
+    Resque.before_fork = proc { $BEFORE_FORK_CALLED = true }
     workerA = Resque::Worker.new(:jobs)
 
     assert !$BEFORE_FORK_CALLED
@@ -377,18 +377,18 @@ context "Resque::Worker" do
     assert $BEFORE_FORK_CALLED
   end
 
-  test "very verbose works in the afternoon" do
+  test 'very verbose works in the afternoon' do
     begin
       require 'time'
-      last_puts = ""
-      Time.fake_time = Time.parse("15:44:33 2011-03-02")
+      last_puts = ''
+      Time.fake_time = Time.parse('15:44:33 2011-03-02')
 
-      @worker.extend(Module.new {
+      @worker.extend(Module.new do
         define_method(:puts) { |thing| last_puts = thing }
-      })
+      end)
 
       @worker.very_verbose = true
-      @worker.log("some log text")
+      @worker.log('some log text')
 
       assert_match /\*\* \[15:44:33 2011-03-02\] \d+: some log text/, last_puts
     ensure
@@ -396,10 +396,10 @@ context "Resque::Worker" do
     end
   end
 
-  test "Will call an after_fork hook after forking" do
+  test 'Will call an after_fork hook after forking' do
     Resque.redis.flushall
     $AFTER_FORK_CALLED = false
-    Resque.after_fork = Proc.new { $AFTER_FORK_CALLED = true }
+    Resque.after_fork = proc { $AFTER_FORK_CALLED = true }
     workerA = Resque::Worker.new(:jobs)
 
     assert !$AFTER_FORK_CALLED
@@ -408,59 +408,59 @@ context "Resque::Worker" do
     assert $AFTER_FORK_CALLED
   end
 
-  test "returns PID of running process" do
-    assert_equal @worker.to_s.split(":")[1].to_i, @worker.pid
+  test 'returns PID of running process' do
+    assert_equal @worker.to_s.split(':')[1].to_i, @worker.pid
   end
 
-  test "requeue failed queue" do
+  test 'requeue failed queue' do
     queue = 'good_job'
-    Resque::Failure.create(:exception => Exception.new, :worker => Resque::Worker.new(queue), :queue => queue, :payload => {'class' => 'GoodJob'})
-    Resque::Failure.create(:exception => Exception.new, :worker => Resque::Worker.new(queue), :queue => 'some_job', :payload => {'class' => 'SomeJob'})
+    Resque::Failure.create(exception: Exception.new, worker: Resque::Worker.new(queue), queue: queue, payload: { 'class' => 'GoodJob' })
+    Resque::Failure.create(exception: Exception.new, worker: Resque::Worker.new(queue), queue: 'some_job', payload: { 'class' => 'SomeJob' })
     Resque::Failure.requeue_queue(queue)
-    assert Resque::Failure.all(0).has_key?('retried_at')
-    assert !Resque::Failure.all(1).has_key?('retried_at')
+    assert Resque::Failure.all(0).key?('retried_at')
+    assert !Resque::Failure.all(1).key?('retried_at')
   end
 
-  test "remove failed queue" do
+  test 'remove failed queue' do
     queue = 'good_job'
     queue2 = 'some_job'
-    Resque::Failure.create(:exception => Exception.new, :worker => Resque::Worker.new(queue), :queue => queue, :payload => {'class' => 'GoodJob'})
-    Resque::Failure.create(:exception => Exception.new, :worker => Resque::Worker.new(queue2), :queue => queue2, :payload => {'class' => 'SomeJob'})
-    Resque::Failure.create(:exception => Exception.new, :worker => Resque::Worker.new(queue), :queue => queue, :payload => {'class' => 'GoodJob'})
+    Resque::Failure.create(exception: Exception.new, worker: Resque::Worker.new(queue), queue: queue, payload: { 'class' => 'GoodJob' })
+    Resque::Failure.create(exception: Exception.new, worker: Resque::Worker.new(queue2), queue: queue2, payload: { 'class' => 'SomeJob' })
+    Resque::Failure.create(exception: Exception.new, worker: Resque::Worker.new(queue), queue: queue, payload: { 'class' => 'GoodJob' })
     Resque::Failure.remove_queue(queue)
     assert_equal queue2, Resque::Failure.all(0)['queue']
     assert_equal 1, Resque::Failure.count
   end
 
-  test "reconnects to redis after fork" do
-    original_connection = Resque.redis.client.connection.instance_variable_get("@sock")
+  test 'reconnects to redis after fork' do
+    original_connection = Resque.redis.client.connection.instance_variable_get('@sock')
     @worker.work(0)
-    assert_not_equal original_connection, Resque.redis.client.connection.instance_variable_get("@sock")
+    assert_not_equal original_connection, Resque.redis.client.connection.instance_variable_get('@sock')
   end
 
-  if !defined?(RUBY_ENGINE) || defined?(RUBY_ENGINE) && RUBY_ENGINE != "jruby"
-    test "old signal handling is the default" do
+  if !defined?(RUBY_ENGINE) || defined?(RUBY_ENGINE) && RUBY_ENGINE != 'jruby'
+    test 'old signal handling is the default' do
       rescue_time = nil
 
       begin
         class LongRunningJob
           @queue = :long_running_job
 
-          def self.perform( run_time, rescue_time=nil )
+          def self.perform(run_time, rescue_time = nil)
             Resque.redis.client.reconnect # get its own connection
-            Resque.redis.rpush( 'sigterm-test:start', Process.pid )
+            Resque.redis.rpush('sigterm-test:start', Process.pid)
             sleep run_time
-            Resque.redis.rpush( 'sigterm-test:result', 'Finished Normally' )
+            Resque.redis.rpush('sigterm-test:result', 'Finished Normally')
           rescue Resque::TermException => e
-            Resque.redis.rpush( 'sigterm-test:result', %Q(Caught SignalException: #{e.inspect}))
+            Resque.redis.rpush('sigterm-test:result', %Q(Caught SignalException: #{e.inspect}))
             sleep rescue_time unless rescue_time.nil?
           ensure
             puts 'fuuuu'
-            Resque.redis.rpush( 'sigterm-test:final', 'exiting.' )
+            Resque.redis.rpush('sigterm-test:final', 'exiting.')
           end
         end
 
-        Resque.enqueue( LongRunningJob, 5, rescue_time )
+        Resque.enqueue(LongRunningJob, 5, rescue_time)
 
         worker_pid = Kernel.fork do
           # ensure we actually fork
@@ -475,7 +475,7 @@ context "Resque::Worker" do
         end
 
         # ensure the worker is started
-        start_status = Resque.redis.blpop( 'sigterm-test:start', 5 )
+        start_status = Resque.redis.blpop('sigterm-test:start', 5)
         assert_not_nil start_status
         child_pid = start_status[1].to_i
         assert_operator child_pid, :>, 0
@@ -485,7 +485,7 @@ context "Resque::Worker" do
         Process.waitpid(worker_pid)
 
         # wait to see how it all came down
-        result = Resque.redis.blpop( 'sigterm-test:result', 5 )
+        result = Resque.redis.blpop('sigterm-test:result', 5)
         assert_nil result
 
         # ensure that the child pid is no longer running
@@ -498,32 +498,32 @@ context "Resque::Worker" do
     end
   end
 
-  if !defined?(RUBY_ENGINE) || defined?(RUBY_ENGINE) && RUBY_ENGINE != "jruby"
+  if !defined?(RUBY_ENGINE) || defined?(RUBY_ENGINE) && RUBY_ENGINE != 'jruby'
     [SignalException, Resque::TermException].each do |exception|
       {
         'cleanup occurs in allotted time' => nil,
         'cleanup takes too long' => 2
-      }.each do |scenario,rescue_time|
+      }.each do |scenario, rescue_time|
         test "SIGTERM when #{scenario} while catching #{exception}" do
           begin
             eval("class LongRunningJob; @@exception = #{exception}; end")
             class LongRunningJob
               @queue = :long_running_job
 
-              def self.perform( run_time, rescue_time=nil )
+              def self.perform(run_time, rescue_time = nil)
                 Resque.redis.client.reconnect # get its own connection
-                Resque.redis.rpush( 'sigterm-test:start', Process.pid )
+                Resque.redis.rpush('sigterm-test:start', Process.pid)
                 sleep run_time
-                Resque.redis.rpush( 'sigterm-test:result', 'Finished Normally' )
+                Resque.redis.rpush('sigterm-test:result', 'Finished Normally')
               rescue @@exception => e
-                Resque.redis.rpush( 'sigterm-test:result', %Q(Caught SignalException: #{e.inspect}))
+                Resque.redis.rpush('sigterm-test:result', %Q(Caught SignalException: #{e.inspect}))
                 sleep rescue_time unless rescue_time.nil?
               ensure
-                Resque.redis.rpush( 'sigterm-test:final', 'exiting.' )
+                Resque.redis.rpush('sigterm-test:final', 'exiting.')
               end
             end
 
-            Resque.enqueue( LongRunningJob, 5, rescue_time )
+            Resque.enqueue(LongRunningJob, 5, rescue_time)
 
             worker_pid = Kernel.fork do
               # ensure we actually fork
@@ -540,7 +540,7 @@ context "Resque::Worker" do
             end
 
             # ensure the worker is started
-            start_status = Resque.redis.blpop( 'sigterm-test:start', 5 )
+            start_status = Resque.redis.blpop('sigterm-test:start', 5)
             assert_not_nil start_status
             child_pid = start_status[1].to_i
             assert_operator child_pid, :>, 0
@@ -550,7 +550,7 @@ context "Resque::Worker" do
             Process.waitpid(worker_pid)
 
             # wait to see how it all came down
-            result = Resque.redis.blpop( 'sigterm-test:result', 5 )
+            result = Resque.redis.blpop('sigterm-test:result', 5)
             assert_not_nil result
             assert !result[1].start_with?('Finished Normally'), 'Job Finished normally. Sleep not long enough?'
             assert result[1].start_with? 'Caught SignalException', 'Signal exception not raised in child.'
@@ -560,7 +560,7 @@ context "Resque::Worker" do
             assert !child_still_running
 
             # see if post-cleanup occurred. This should happen IFF the rescue_time is less than the term_timeout
-            post_cleanup_occurred = Resque.redis.lpop( 'sigterm-test:final' )
+            post_cleanup_occurred = Resque.redis.lpop('sigterm-test:final')
             assert post_cleanup_occurred, 'post cleanup did not occur. SIGKILL sent too early?' if rescue_time.nil?
             assert !post_cleanup_occurred, 'post cleanup occurred. SIGKILL sent too late?' unless rescue_time.nil?
 
@@ -572,14 +572,14 @@ context "Resque::Worker" do
       end
     end
 
-    test "displays warning when not using term_child" do
+    test 'displays warning when not using term_child' do
       stderr = capture_stderr { @worker.work(0) }
 
       assert stderr.match(/^WARNING:/)
     end
 
-    test "it does not display warning when using term_child" do
-      @worker.term_child = "1"
+    test 'it does not display warning when using term_child' do
+      @worker.term_child = '1'
       stderr = capture_stderr { @worker.work(0) }
 
       assert !stderr.match(/^WARNING:/)
