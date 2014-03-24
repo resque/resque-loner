@@ -1,3 +1,14 @@
+1.3.0
+--------------------------------
+Enhancements and bug fixes from @mateusdelbianco.  Not allowing a job to
+be executed immediately after execution, another from @mateusdelbianco!
+Merged @andrejj's fix which removes an unused `#first` from a redis
+multi call.  @kforsman created an internal helpers module to remove the
+dependency on the deprecated `Resque::Helpers` module.  Added RuboCop,
+SimpleCov, and CodeClimate, plus tweaked some stuff in Travis
+configuration.
+
+
 1.2.1
 --------------------------------
 Merged @aerodynamik's pull request. Enqueuing and marking as
