@@ -31,13 +31,13 @@ module Resque
         end
 
         def self.unique_job_queue_key(queue, item)
-          job_key = constantize(item[:class] || item['class']).redis_key(item)
+          job_key = constantize(item['class']).redis_key(item)
           "loners:queue:#{queue}:job:#{job_key}"
         end
 
         def self.item_is_a_unique_job?(item)
           begin
-            klass = constantize(item[:class] || item['class'])
+            klass = constantize(item['class'])
             klass.included_modules.include?(::Resque::Plugins::UniqueJob)
           rescue
             false # Resque testsuite also submits strings as job classes while Resque.enqueue'ing,
@@ -46,7 +46,7 @@ module Resque
 
         def self.item_ttl(item)
           begin
-            constantize(item[:class] || item['class']).loner_ttl
+            constantize(item['class']).loner_ttl
           rescue
             -1
           end
@@ -54,7 +54,7 @@ module Resque
 
         def self.loner_lock_after_execution_period(item)
           begin
-            constantize(item[:class] || item['class']).loner_lock_after_execution_period
+            constantize(item['class']).loner_lock_after_execution_period
           rescue
             0
           end
