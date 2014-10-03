@@ -27,12 +27,13 @@ Gem::Specification.new do |s|
     rack-test
     rake
     rspec
-    rubocop
     simplecov
     yajl-ruby
   ).each do |gemname|
     s.add_development_dependency gemname
   end
+
+  s.add_development_dependency 'rubocop', '=0.19.1'
 
   s.executables = `git ls-files -z -- bin/*`.split("\0").map do
     |f| File.basename(f)
