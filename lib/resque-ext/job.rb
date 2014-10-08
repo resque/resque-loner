@@ -5,12 +5,23 @@
 #
 module Resque
   class Job
+
+    #
+    #  Check if the current job is a UniqueJob
+    #
+    def self.is_unique_job?(klass)
+      klass = klass.constantize if klass.instance_of?(String)
+      klass.included_modules.include?(::Resque::Plugins::UniqueJob)
+    end
     #
     #  Overwriting original create method to mark an item as queued
     #  after Resque::Job.create has called Resque.push
     #
     def self.create_with_loner(queue, klass, *args)
-      return create_without_loner(queue, klass, *args) if Resque.inline?
+      if Resque.inline? || !is_unique_job?(klass)
+        return create_without_loner(queue, klass, *args)
+      end
+
       item = { class: klass.to_s, args: args }
       return 'EXISTED' if Resque::Plugins::Loner::Helpers.loner_queued?(queue, item)
       # multi block returns array of keys
@@ -38,7 +49,10 @@ module Resque
     #  as the original method Resque::Job.destroy. Couldn't make it any dry'er.
     #
     def self.destroy_with_loner(queue, klass, *args)
-      Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args) unless Resque.inline?
+      if !Resque.inline? && is_unique_job?(klass)
+        Resque::Plugins::Loner::Helpers.job_destroy(queue, klass, *args)
+      end
+
       destroy_without_loner(queue, klass, *args)
     end
 
