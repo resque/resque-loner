@@ -122,8 +122,8 @@ describe 'Resque' do
 
     it 'should report if a job is queued or not' do
       Resque.enqueue SomeUniqueJob, 'foo'
-      Resque.enqueued?(SomeUniqueJob, 'foo').should be_true
-      Resque.enqueued?(SomeUniqueJob, 'bar').should be_false
+      Resque.enqueued?(SomeUniqueJob, 'foo').should be true
+      Resque.enqueued?(SomeUniqueJob, 'bar').should be false
     end
 
     it 'should report if a job is in a special queue or not' do
@@ -131,11 +131,11 @@ describe 'Resque' do
       SomeUniqueJob.instance_variable_set(:@queue, :special_queue)
 
       Resque.enqueue SomeUniqueJob, 'foo'
-      Resque.enqueued_in?(:special_queue, SomeUniqueJob, 'foo').should be_true
+      Resque.enqueued_in?(:special_queue, SomeUniqueJob, 'foo').should be true
 
       SomeUniqueJob.instance_variable_set(:@queue, default_queue)
 
-      Resque.enqueued?(SomeUniqueJob, 'foo').should be_false
+      Resque.enqueued?(SomeUniqueJob, 'foo').should be false
     end
 
     it 'should not be able to report if a non-unique job was enqueued' do
@@ -158,7 +158,7 @@ describe 'Resque' do
 
     it 'should honor loner_ttl in the redis key' do
       Resque.enqueue UniqueJobWithTtl
-      Resque.enqueued?(UniqueJobWithTtl).should be_true
+      Resque.enqueued?(UniqueJobWithTtl).should be true
       k = Resque.redis.keys 'loners:queue:unique_with_ttl:job:*'
       k.length.should == 1
       Resque.redis.ttl(k[0]).should be_within(2).of(UniqueJobWithTtl.loner_ttl)
@@ -182,6 +182,11 @@ describe 'Resque' do
       k = Resque.redis.keys 'loners:queue:unique_with_loner_lock_after_execution_period:job:*'
       k.length.should == 1
       Resque.redis.ttl(k[0]).should be_within(2).of(UniqueJobWithLockAfterExecution.loner_lock_after_execution_period)
+    end
+
+    it 'should handle nil job args from Resque' do
+      expect { Resque::Plugins::Loner::UniqueJob.redis_key(class: 'Something', args: nil) }.
+          to_not raise_error
     end
   end
 end
