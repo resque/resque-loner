@@ -17,7 +17,7 @@ end
 
 task default: [:rubocop, :spec]
 
-Rubocop::RakeTask.new
+(defined?(RuboCop) ? RuboCop : Rubocop)::RakeTask.new
 
 desc 'Run specs for resque-loner'
 RSpec::Core::RakeTask.new(:spec) do |t|
