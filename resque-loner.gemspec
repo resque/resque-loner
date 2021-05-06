@@ -12,7 +12,6 @@ Gem::Specification.new do |s|
   s.email = ['jannis@moviepilot.com']
   s.homepage = 'http://github.com/jayniz/resque-loner'
   s.summary = 'Adds unique jobs to resque'
-  s.has_rdoc = false
   s.license = 'MIT'
 
   s.rubyforge_project = 'resque-loner'
