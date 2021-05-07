@@ -12,12 +12,11 @@ Gem::Specification.new do |s|
   s.email = ['jannis@moviepilot.com']
   s.homepage = 'http://github.com/jayniz/resque-loner'
   s.summary = 'Adds unique jobs to resque'
-  s.has_rdoc = false
   s.license = 'MIT'
 
   s.rubyforge_project = 'resque-loner'
 
-  s.add_dependency 'resque', '~>1.0'
+  s.add_dependency 'resque', '~>2.0'
 
   %w(
     airbrake
