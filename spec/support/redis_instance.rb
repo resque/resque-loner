@@ -70,7 +70,7 @@ class RedisInstance # rubocop:disable ClassLength
 
     def reassign_redis_clients
       Resque.redis = Redis.new(
-        hostname: '127.0.0.1', port: port, thread_safe: true
+        host: '127.0.0.1', port: port
       )
     end
 
