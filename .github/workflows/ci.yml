@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version:
+          - 2.3
+          - 2.4
+          - 2.5
+          - 2.6
+          - 2.7
+          - 3.0
+          - 3.1
+        resque-version:
+          - "master"
+          - "~> 2.4.0"
+          - "~> 1.27"
+        redis-version:
+          - "~> 4.x"
+          - "~> 5.x"
+        exclude:
+          - ruby-version: 2.3
+            resque-version: "~> 1.27"
+          - ruby-version: 2.5
+            resque-version: "~> 2.4.0"
+          - ruby-version: 2.5
+            resque-version: master
+          - ruby-version: 2.3
+            redis-version: "~> 5.x"
+          - ruby-version: 2.4
+            redis-version: "~> 5.x"
+          - resque-version: "~> 1.27"
+            redis-version: "~> 5.x"
+    env:
+      REDIS_VERSION: "${{ matrix.redis-version }}"
+      RESQUE: "${{ matrix.resque-version }}"
+      RESQUE_LONER_DISABLE_TEST_REDIS_SERVER: 1
+      COVERAGE: 1
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "${{ matrix.ruby-version }}"
+          bundler-cache: true
+      - run: bundle exec rake
