@@ -1,8 +1,7 @@
 Resque-Loner
 ======
 
-[![Build Status](https://secure.travis-ci.org/resque/resque-loner.png?branch=master)](https://travis-ci.org/resque/resque-loner)
-[![Code Climate](https://codeclimate.com/github/resque/resque-loner.png)](https://codeclimate.com/github/resque/resque-loner)
+[![Build Status](https://github.com/resque/resque/actions/workflows/ci.yml/badge.svg)](https://github.com/resque/resque/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/resque-loner.png)](http://badge.fury.io/rb/resque-loner)
 
 Resque-Loner is a plugin for defunkt/resque which adds unique jobs to resque: Only one job with the same payload per queue.
