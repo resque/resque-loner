@@ -9,19 +9,19 @@ class RedisRunner
     @redis_dir ||= if ENV['PREFIX']
                      Pathname.new(ENV['PREFIX'])
                    else
-                     Pathname.new(`which redis-server`) + '..' + '..'
+                     "#{Pathname.new(`which redis-server`)}...."
                    end
   end
 
   def self.bin_dir
-    redis_dir + 'bin'
+    "#{redis_dir}bin"
   end
 
   def self.config
-    @config ||= if File.exists?(redis_dir + 'etc/redis.conf')
-                  redis_dir + 'etc/redis.conf'
+    @config ||= if File.exists?("#{redis_dir}etc/redis.conf")
+                  "#{redis_dir}etc/redis.conf"
                 else
-                  redis_dir + '../etc/redis.conf'
+                  "#{redis_dir}../etc/redis.conf"
                 end
   end
 
