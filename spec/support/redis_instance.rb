@@ -3,7 +3,7 @@ require 'socket'
 require 'timeout'
 require 'fileutils'
 
-class RedisInstance # rubocop:disable ClassLength
+class RedisInstance # rubocop:disable Metrics/ClassLength
   class << self
     @running = false
     @port = nil
