@@ -9,15 +9,12 @@ load 'tasks/redis.rake'
 require 'rake/testtask'
 require 'resque/tasks'
 require 'bundler/gem_tasks'
-require 'rubocop/rake_task'
 
 def command?(command)
   system("type #{command} > /dev/null 2>&1")
 end
 
-task default: [:rubocop, :spec]
-
-RuboCop::RakeTask.new
+task default: :spec
 
 desc 'Run specs for resque-loner'
 RSpec::Core::RakeTask.new(:spec) do |t|
