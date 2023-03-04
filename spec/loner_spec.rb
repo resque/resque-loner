@@ -46,7 +46,7 @@ end
 describe 'Resque' do
 
   before(:each) do
-    Resque.redis.flushall
+    Resque.data_store.redis.flushall
     Resque.size(:other_queue).should == 0
     Resque.size(:some_queue).should == 0
   end

@@ -2,7 +2,7 @@ require 'test_helper'
 
 context 'Resque' do
   setup do
-    Resque.redis.flushall
+    Resque.data_store.redis.flushall
 
     Resque.push(:people,  'name' => 'chris')
     Resque.push(:people,  'name' => 'bob')
@@ -203,7 +203,7 @@ context 'Resque' do
   end
 
   test 'queues are always a list' do
-    Resque.redis.flushall
+    Resque.data_store.redis.flushall
     assert_equal [], Resque.queues
   end
 
