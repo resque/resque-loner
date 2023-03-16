@@ -24,11 +24,16 @@ module Resque
           payload = decode(encode(payload)) # This is the cycle the data goes when being enqueued/dequeued
           job  = payload[:class] || payload['class']
           args = (payload[:args]  || payload['args'])
-          args.map! do |arg|
-            arg.is_a?(Hash) ? arg.sort : arg
-          end
+          args = map_args(args)
 
           Digest::MD5.hexdigest(encode(class: job, args: args))
+        end
+ 
+        # Separate method for easy overriding
+        def map_args(args)
+          args.map do |arg|
+            arg.is_a?(Hash) ? arg.sort : arg
+          end
         end
 
         #
