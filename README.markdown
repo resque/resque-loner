@@ -82,7 +82,7 @@ Here's how these keys are constructed:
 
     resque:loners:queue:cache_sweeps:job:5ac5a005253450606aa9bc3b3d52ea5b
     |          |        |                |
-    |          |        |                `---- Job's ID (#redis_key method)
+    |          |        |                `---- Job's ID (#resque_loner_redis_key method)
     |          |        `--------------------- Name of the queue
     |          `------------------------------ Prefix for this plugin
     `----------------------------------------- Your redis namespace
@@ -91,15 +91,15 @@ The last part of this key is the job's ID, which is pretty much your queue item'
 
     { 'class': 'CacheSweeper', 'args': [1] }`
 
-The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::UniqueJob#redis_key`).
+The default method to create a job ID from these parameters  is to do some normalization on the payload and then md5'ing it (defined in `Resque::Plugins::UniqueJob#resque_loner_redis_key`).
 
 You could also use the whole payload or anything else as a redis key, as long as you make sure these requirements are met:
 
-1. Two jobs of the same class with the same parameters/arguments/workload must produce the same redis_key
+1. Two jobs of the same class with the same parameters/arguments/workload must produce the same resque_loner_redis_key
 2. Two jobs with either a different class or different parameters/arguments/workloads must not produce the same redis key 
 3. The key must not be binary, because this restriction applies to redis keys: *Keys are not binary safe strings in Redis, but just strings not containing a space or a newline character. For instance "foo" or "123456789" or "foo_bar" are valid keys, while "hello world" or "hello\n" are not.* (see http://code.google.com/p/redis/wiki/IntroductionToRedisDataTypes)
 
-So when your job overwrites the #redis_key method, make sure these requirements are met. And all should be good.
+So when your job overwrites the #resque_loner_redis_key method, make sure these requirements are met. And all should be good.
 
 ### Resque integration
 
