@@ -31,7 +31,7 @@ module Resque
         end
 
         def self.unique_job_queue_key(queue, item)
-          job_key = constantize(item[:class] || item['class']).redis_key(item)
+          job_key = constantize(item[:class] || item['class']).resque_loner_redis_key(item)
           "loners:queue:#{queue}:job:#{job_key}"
         end
 
