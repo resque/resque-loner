@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = 'resque-loner'
 
-  s.add_runtime_dependency 'resque', '>= 1.27'
+  s.add_runtime_dependency 'resque', '>= 2.0'
 
   %w(
     airbrake
